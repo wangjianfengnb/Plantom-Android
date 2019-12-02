@@ -21,8 +21,7 @@ public class ChatHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE conversation(" +
                 "conversation_id integer primary key autoincrement," +
                 "conversation_name varchar(20)," +
-                "sender_id varchar(20)," +
-                "receiver_id varchar(20)," +
+                "target_id varchar(20)," +
                 "type integer," +
                 "unread integer" +
                 ")");
@@ -34,14 +33,18 @@ public class ChatHelper extends SQLiteOpenHelper {
 
     }
 
-    public void saveConversation(Conversation conversation){
+    /**
+     * 保存回话
+     *
+     * @param conversation 回话
+     */
+    public void saveConversation(Conversation conversation) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put("conversation_name",conversation.getConversationName());
-//        contentValues.put("sender_id",conversation.getSenderId());
-//        contentValues.put("receiver_id",conversation.getReceiverId());
-        contentValues.put("type",conversation.getType());
-        contentValues.put("unread",conversation.getUnread());
-        long id = this.db.insert("conversation", "conversatoin_id", contentValues);
+        contentValues.put("conversation_name", conversation.getConversationName());
+        contentValues.put("target_id", conversation.getTargetId());
+        contentValues.put("type", conversation.getType());
+        contentValues.put("unread", conversation.getUnread());
+        long id = this.db.insert("conversation", "conversation_id", contentValues);
         conversation.setConversationId(id);
     }
 }
