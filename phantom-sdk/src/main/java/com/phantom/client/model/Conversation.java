@@ -10,13 +10,13 @@ public class Conversation {
 
     private int type;
 
-    private String senderId;
-
-    private String receiverId;
+    private String targetId;
 
     private int unread;
 
     private String conversationName;
+
+    private ChatMessage lastMessage;
 
     public String getConversationName() {
         return conversationName;
@@ -42,20 +42,16 @@ public class Conversation {
         this.type = type;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public String getTargetId() {
+        return targetId;
     }
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
+    public void setTargetId(String targetId) {
+        this.targetId = targetId;
     }
 
-    public String getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
+    public void setLastMessage(ChatMessage lastMessage) {
+        this.lastMessage = lastMessage;
     }
 
     public int getUnread() {
@@ -69,10 +65,12 @@ public class Conversation {
     public TextMessage createTextMessage(String content) {
         TextMessage message = new TextMessage();
         message.setType(type);
-        message.setSenderId(senderId);
-        message.setReceiverId(receiverId);
+        message.setReceiverId(targetId);
         message.setContent(content);
         return message;
     }
 
+    public ChatMessage getLastMessage() {
+        return lastMessage;
+    }
 }

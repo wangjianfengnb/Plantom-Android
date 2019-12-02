@@ -7,16 +7,16 @@ import androidx.multidex.MultiDex;
  */
 public class App extends android.app.Application {
 
-    private App mContext;
+    private static App mContext;
 
     @Override
     public void onCreate() {
         super.onCreate();
         MultiDex.install(this);
-        this.mContext = this;
+        mContext = this;
     }
 
-    public App getContext() {
+    public static App getContext() {
         return mContext;
     }
 }

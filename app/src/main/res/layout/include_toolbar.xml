@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/toolbar"
+    style="@style/ToolBarStyle"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/toolbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxWidth="@dimen/x500"
+        android:maxLines="1"
+        android:paddingLeft="@dimen/x10"
+        android:paddingTop="@dimen/x20"
+        android:paddingRight="@dimen/x10"
+        android:paddingBottom="@dimen/x20"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_50"
+        tools:text="标题" />
+
+    <ProgressBar
+        android:id="@+id/toolbar_pb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="visible" />
+
+</androidx.appcompat.widget.Toolbar>

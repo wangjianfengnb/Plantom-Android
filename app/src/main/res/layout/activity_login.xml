@@ -4,18 +4,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <include layout="@layout/include_custom_toolbar"/>
+
     <EditText
-        android:id="@+id/username"
+        android:id="@+id/login_username"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="100dp"
         android:hint="请输入用户名"
         android:textColor="#000"
         android:textSize="16sp" />
 
     <Button
-        android:id="@+id/login"
+        android:id="@+id/login_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

@@ -37,8 +37,8 @@ public class ChatHelper extends SQLiteOpenHelper {
     public void saveConversation(Conversation conversation){
         ContentValues contentValues = new ContentValues();
         contentValues.put("conversation_name",conversation.getConversationName());
-        contentValues.put("sender_id",conversation.getSenderId());
-        contentValues.put("receiver_id",conversation.getReceiverId());
+//        contentValues.put("sender_id",conversation.getSenderId());
+//        contentValues.put("receiver_id",conversation.getReceiverId());
         contentValues.put("type",conversation.getType());
         contentValues.put("unread",conversation.getUnread());
         long id = this.db.insert("conversation", "conversatoin_id", contentValues);

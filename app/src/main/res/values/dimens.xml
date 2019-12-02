@@ -1,0 +1,37 @@
+<resources>
+    <dimen name="text_30">@dimen/x30</dimen>
+    <dimen name="text_34">@dimen/x34</dimen>
+    <dimen name="text_35">@dimen/x35</dimen>
+    <dimen name="text_36">@dimen/x36</dimen>
+    <dimen name="text_38">@dimen/x38</dimen>
+    <dimen name="text_40">@dimen/x40</dimen>
+    <dimen name="text_43">@dimen/x43</dimen>
+    <dimen name="text_45">@dimen/x45</dimen>
+    <dimen name="text_46">@dimen/x46</dimen>
+    <dimen name="text_50">@dimen/x50</dimen>
+    <dimen name="text_55">@dimen/x55</dimen>
+    <dimen name="text_60">@dimen/x60</dimen>
+    <dimen name="text_65">@dimen/x65</dimen>
+    <dimen name="text_70">@dimen/x70</dimen>
+    <dimen name="text_75">@dimen/x75</dimen>
+    <dimen name="text_80">@dimen/x80</dimen>
+    <dimen name="text_85">@dimen/x85</dimen>
+    <dimen name="text_90">@dimen/x90</dimen>
+    <dimen name="text_95">@dimen/x95</dimen>
+    <dimen name="text_100">@dimen/x100</dimen>
+    <dimen name="text_105">@dimen/x105</dimen>
+    <dimen name="text_110">@dimen/x110</dimen>
+    <dimen name="text_115">@dimen/x115</dimen>
+    <dimen name="text_120">@dimen/x120</dimen>
+    <dimen name="text_125">@dimen/x125</dimen>
+    <dimen name="text_130">@dimen/x130</dimen>
+    <dimen name="text_135">@dimen/x135</dimen>
+    <dimen name="text_155">@dimen/x155</dimen>
+    <dimen name="text_165">@dimen/x165</dimen>
+    <dimen name="text_175">@dimen/x175</dimen>
+    <dimen name="text_185">@dimen/x185</dimen>
+    <dimen name="text_250">@dimen/x250</dimen>
+    <dimen name="text_300">@dimen/x300</dimen>
+    <dimen name="radius">5dp</dimen>
+    <dimen name="progress_circle_radius">34dp</dimen>
+</resources>

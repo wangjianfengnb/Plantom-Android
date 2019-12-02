@@ -34,4 +34,6 @@ public abstract class ChatMessage {
     }
 
     public abstract String getMessageContent();
+
+    public abstract String getSummary();
 }

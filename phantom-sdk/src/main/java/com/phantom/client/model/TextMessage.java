@@ -15,6 +15,11 @@ public class TextMessage extends ChatMessage {
         return obj.toJSONString();
     }
 
+    @Override
+    public String getSummary() {
+        return content;
+    }
+
     public void setContent(String content) {
         this.content = content;
     }

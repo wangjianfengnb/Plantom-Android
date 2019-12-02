@@ -1,11 +1,33 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="ToolBarStyle">
+        <item name="android:background">@color/bg_toolbar</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/y150</item>
+        <item name="android:minHeight">@dimen/y150</item>
+        <item name="android:theme">@style/PopWindowStyle</item>
+    </style>
+
+    <style name="PopWindowStyle">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:colorBackground">@color/transparent</item>
+        <item name="actionMenuTextColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textSize">@dimen/text_60</item>
+        <item name="android:popupAnimationStyle">@style/PopupAnimation</item>
+    </style>
+
+    <style name="PopupAnimation" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/anim_down_in</item>
+        <item name="android:windowExitAnimation">@anim/anim_up_out</item>
     </style>
 
 </resources>

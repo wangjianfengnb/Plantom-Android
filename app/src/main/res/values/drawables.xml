@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="white">@color/white</drawable>
+    <drawable name="gray">@color/gray</drawable>
+    <drawable name="model_gray">@color/bg_default</drawable>
+    <drawable name="bg_gray">#FAFAFA</drawable>
+    <drawable name="transparent">@color/transparent</drawable>
+    <drawable name="colorPrimary">@color/colorPrimary</drawable>
+</resources>

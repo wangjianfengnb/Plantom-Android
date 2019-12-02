@@ -3,4 +3,108 @@
     <color name="colorPrimary">#6200EE</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+
+    <color name="bg_activity">#F0F0F0</color>
+    <color name="colorPrimary_press">#1973f0</color>
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#333333</color>
+    <color name="gray">#e0e0e0</color>
+    <color name="gray_alpha">#55c0c0c0</color>
+    <color name="orange">#f58136</color>
+    <color name="default_text_color">#333333</color>
+    <color name="bg_toolbar">@color/colorPrimary</color>
+    <color name="btn_splash_jump">#88000000</color>
+    <color name="btn_index_pressed">#e0e0e0</color>
+    <color name="btn_index_qiugou">#ff7043</color>
+    <color name="btn_index_qiugou_pressed">#D65D38</color>
+    <color name="btn_login_press">#3877C0</color>
+    <color name="btn_login">@color/colorPrimary</color>
+    <color name="color_main_tab_checked">@color/colorPrimary</color>
+    <color name="color_brand_text">#222222</color>
+    <color name="color_main_tab_unchecked">#979797</color>
+    <color name="color_item_part_blue">@color/colorPrimary</color>
+    <color name="red">#FF0000</color>
+    <color name="alpha_red">#75FF0000</color>
+    <color name="green">#00FF00</color>
+    <color name="btn_green">#36a901</color>
+    <color name="btn_green_press">#9036a901</color>
+    <color name="blue">#1973bf</color>
+    <color name="bg_chat">#eeeeee</color>
+    <color name="bg_chat_line">#AAAAAA</color>
+    <color name="horizontal_line">#e8e8e8</color>
+    <color name="order_blue">#00B2EE</color>
+    <color name="order_sky_blue">#28B8A6</color>
+    <color name="order_green">#008B00</color>
+    <color name="order_green_alpha">#77008B00</color>
+    <color name="order_grass_green">#8BC34A</color>
+    <color name="order_orange">#FF7F24</color>
+    <color name="order_blue_new">#3f9ded</color>
+    <color name="default_gray">#F2F2F2</color>
+    <color name="used_car_yellow">#F0A219</color>
+    <color name="used_car_gray">#CCCCCC</color>
+    <color name="used_car_red">#E3231A</color>
+    <color name="used_car_blue">#1973BF</color>
+    <color name="bg_common_deep_gray_normal">#f5f5f5</color>
+    <color name="bg_common_deep_gray_press">#e5e5e5</color>
+    <!--photo picker 的选中背景图-->
+    <color name="__picker_item_photo_border_selected">#1973BF</color>
+    <color name="recycle_line">#c9c9c9</color>
+    <color name="success_stroke_color">#A5DC86</color>
+
+    <!--vin历史记录、维修记录、原厂数据记录-->
+    <color name="vin_record_green">#108354</color>
+    <color name="vin_record_blue">#1973bf</color>
+    <color name="vin_record_red">#D50000</color>
+
+    <!--维修记录卡片-->
+    <color name="fix_record_blank">#333333</color>
+    <color name="fix_record_red">#E51C23</color>
+    <color name="fix_record_orange">#EB8713</color>
+    <color name="fix_record_green">#259B24</color>
+
+
+
+    <!--默认背景颜色-->
+    <color name="bg_default">#f0f0f0</color>
+    <!--按钮边框颜色 灰色-->
+    <color name="border_gray">#cccccc</color>
+    <!--背景 灰色-->
+    <color name="bg_gray">#f0f0f0</color>
+    <!--线条颜色-->
+    <color name="line_gray">#e8e8e8</color>
+    <!--描述性字体颜色-->
+    <color name="text_description">#999999</color>
+    <!--默认字体颜色黑色-->
+    <color name="text_black">#333333</color>
+    <!--红色字体-->
+    <color name="text_red">#e3231a</color>
+    <!--深灰字体-->
+    <color name="text_gray">#666666</color>
+    <!--深红色字体-->
+    <color name="text_dark_red">#E51C23</color>
+
+    <color name="search_match_green">#2BAF2B</color>
+
+
+    <color name="model_compare_small_title">#444444</color>
+    <color name="model_compare_small_rect">#555555</color>
+    <color name="model_compare_title">#333333</color>
+    <color name="model_compare_line">#dddddd</color>
+
+    <color name="model_compare_small_title_bg">#f0f0f0</color>
+    <color name="model_compare_column_bg">#eeeeee</color>
+
+
+    <color name="item_require">#f0f0f0</color>
+
+    <color name="pink">#ff4081</color>
+
+    <color name="guide_btn_default">#3983E3</color>
+    <color name="guide_btn_select">#803983E3</color>
+
+
+    <color name="alpha_black_bg">#80000000</color>
+    <color name="vin_finder_mask">#90000000</color>
+    <color name="text_search_hint">#a1a1a1</color>
 </resources>
