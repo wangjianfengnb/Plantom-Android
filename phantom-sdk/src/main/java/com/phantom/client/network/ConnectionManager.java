@@ -174,6 +174,9 @@ public class ConnectionManager {
      */
     public void authenticate(Message message) {
         this.authenticateMessage = message;
+        synchronized (this) {
+            notifyAll();
+        }
     }
 
     public void reauthenticate() {
@@ -195,6 +198,12 @@ public class ConnectionManager {
                         Log.i(TAG, "连接不上服务器，休眠5s再次连接");
                         Thread.sleep(5 * 1000);
                         continue;
+                    }
+                    if(authenticateMessage == null){
+                        synchronized (ConnectionManager.this) {
+                            Log.i(TAG, "还没有认证消息休眠......");
+                            ConnectionManager.this.wait();
+                        }
                     }
                     String ipAndPort = jsonObject.getString("ipAndPort");
                     String ip = ipAndPort.split(":")[0];
@@ -249,7 +258,7 @@ public class ConnectionManager {
                         Thread.sleep(1000);
                     }
                     if (channel != null) {
-                        Log.i(TAG, "发送消息：requestType =" + Constants.requestTypeName(msg.getRequestType()));
+                        Log.i(TAG, "发送消息：requestType = " + Constants.requestTypeName(msg.getRequestType()));
                         channel.writeAndFlush(msg.getBuffer());
                     }
                 } catch (InterruptedException e) {

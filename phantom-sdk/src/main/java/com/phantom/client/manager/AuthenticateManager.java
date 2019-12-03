@@ -24,7 +24,7 @@ public class AuthenticateManager implements MessageHandler {
         if (authenticateResponse.getStatus() == Constants.RESPONSE_STATUS_OK) {
             ConnectionManager.getInstance().setAuthenticate(true);
             Log.i(TAG, "认证请求成功...开始拉取离线消息");
-            chatManager.fetchMessage(authenticateResponse.getUid());
+            chatManager.onAuthenticateSuccess(authenticateResponse.getUid());
         } else {
             Log.i(TAG, "认证请求失败，休眠后再次发送认证请求...");
             try {

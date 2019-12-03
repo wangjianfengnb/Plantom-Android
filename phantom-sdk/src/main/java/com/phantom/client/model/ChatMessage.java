@@ -12,6 +12,8 @@ public class ChatMessage {
 
     private Long id;
 
+    private Long userId;
+
     private Long messageId;
 
     private Integer messageType;
@@ -29,6 +31,14 @@ public class ChatMessage {
     private String crc;
 
     private String messageContent;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public Long getId() {
         return id;

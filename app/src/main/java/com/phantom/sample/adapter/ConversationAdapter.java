@@ -56,7 +56,7 @@ public class ConversationAdapter extends BaseAdapter<Conversation, ConversationA
     }
 
     public void addFirst(Conversation conversation) {
-        mData.add(conversation);
+        mData.add(0, conversation);
     }
 
     public void update(Conversation conversation) {

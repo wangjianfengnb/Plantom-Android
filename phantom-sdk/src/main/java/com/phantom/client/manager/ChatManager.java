@@ -1,6 +1,7 @@
 package com.phantom.client.manager;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -15,7 +16,9 @@ import com.phantom.client.model.request.Message;
 import com.phantom.client.model.request.OfflineMessage;
 import com.phantom.client.network.ConnectionManager;
 import com.phantom.client.sqlite.ChatHelper;
+import com.phantom.client.utils.RxHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChatManager implements MessageHandler, IChatManager {
@@ -25,28 +28,41 @@ public class ChatManager implements MessageHandler, IChatManager {
     /**
      * 本地最大的sequence
      */
-    private volatile long sequence = 0;
+    private volatile long sequence;
 
     /**
      * 本地最大的时间戳
      */
-    private volatile long timestamp = 0;
+    private volatile long timestamp;
+
+    private List<OnConversationChangeListener> onConversationChangeListeners = new ArrayList<>();
 
     private ChatHelper chatHelper;
 
-    public ChatManager(Context context) {
+    private String userId;
+
+    ChatManager(Context context) {
         chatHelper = new ChatHelper(context);
-        timestamp = loadMaxMessageTimestamp();
-        sequence = loadMaxSequence();
         Log.i(TAG, "加载最大的消息时间戳为：" + timestamp + ", 最大序列号为：" + sequence);
     }
 
+
     private long loadMaxSequence() {
-        return chatHelper.getMaxSequence();
+        return chatHelper.getMaxSequence(userId);
     }
 
     private long loadMaxMessageTimestamp() {
-        return chatHelper.getMaxMessageTimestamp();
+        return chatHelper.getMaxMessageTimestamp(userId);
+    }
+
+    void onAuthenticateSuccess(String uid) {
+        this.userId = uid;
+        timestamp = loadMaxMessageTimestamp();
+        sequence = loadMaxSequence();
+        synchronized (this) {
+            notifyAll();
+        }
+        fetchMessage(this.userId);
     }
 
     /**
@@ -54,7 +70,8 @@ public class ChatManager implements MessageHandler, IChatManager {
      *
      * @param uid 用户ID
      */
-    public void fetchMessage(String uid) {
+    void fetchMessage(String uid) {
+
         ConnectionManager.getInstance().fetchMessage(uid, getMaxTimestamp());
     }
 
@@ -86,14 +103,14 @@ public class ChatManager implements MessageHandler, IChatManager {
                     List<OfflineMessage> messagesList = response.getMessagesList();
                     for (OfflineMessage msg : messagesList) {
                         // 要求sequence严格递增，但是由于测试阶段没有地方持久化sequence，先注释
-                        if (msg.getSequence() == sequence + 1) {
-                            sequence++;
-                            timestamp = msg.getTimestamp();
-                            handleMessage(msg);
-                        } else {
-                            Log.i(TAG, "发现获取到的消息sequence不连续，丢弃后续的消息");
-                            break;
-                        }
+//                        if (msg.getSequence() == sequence + 1) {
+                        sequence++;
+                        timestamp = msg.getTimestamp();
+                        handleMessage(msg);
+//                        } else {
+//                            Log.i(TAG, "发现获取到的消息sequence不连续，丢弃后续的消息");
+//                            break;
+//                        }
                     }
                     fetchMessage(response.getUid());
                 }
@@ -116,33 +133,57 @@ public class ChatManager implements MessageHandler, IChatManager {
     }
 
     private synchronized Conversation getOrCreateConversation(OfflineMessage message) {
-        int conversationType = message.getGroupId() == null ? Conversation.TYPE_C2G : Conversation.TYPE_C2C;
-        String targetId = message.getGroupId() == null ? message.getSenderId() : message.getGroupId();
-        Conversation conversation = chatHelper.getConversation(conversationType, targetId);
+        int conversationType = TextUtils.isEmpty(message.getGroupId()) ? Conversation.TYPE_C2C : Conversation.TYPE_C2G;
+        String targetId = TextUtils.isEmpty(message.getGroupId()) ? message.getSenderId() : message.getGroupId();
+        Conversation conversation = chatHelper.getConversation(userId, conversationType, targetId);
         if (conversation == null) {
             conversation = new Conversation();
             conversation.setUnread(1);
-            conversation.setTargetId(message.getGroupId());
-            conversation.setConversationType(Conversation.TYPE_C2G);
-            conversation.setConversationName("群聊（应该从接口获取）");
+            conversation.setTargetId(targetId);
+            conversation.setUserId(userId);
+            conversation.setConversationType(conversationType);
+            conversation.setConversationName("老子的ID是" + targetId);
+            conversation.setLastMessage(message.getContent());
+            conversation.setLastUpdate(message.getTimestamp());
             chatHelper.saveConversation(conversation);
+            informConversationChange(conversation, true);
         } else {
             conversation.setUnread(conversation.getUnread() + 1);
+            conversation.setLastMessage(message.getContent());
+            conversation.setLastUpdate(message.getTimestamp());
             chatHelper.updateConversationUnread(conversation);
+            informConversationChange(conversation, false);
         }
         return conversation;
     }
 
+    private void informConversationChange(Conversation conversation, boolean isNew) {
+        RxHelper.runOnUI(() -> {
+            for (OnConversationChangeListener listener : onConversationChangeListeners) {
+                listener.onConversationChange(conversation, isNew);
+            }
+        });
+    }
+
     @Override
-    public void loadConversation(int page, int size,LoadConversationListener listener) {
-        List<Conversation> conversations = chatHelper.loadConversation(page, size);
-        if(listener != null){
+    public void loadConversation(int page, int size, LoadConversationListener listener) {
+        while (userId == null) {
+            synchronized (this) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        List<Conversation> conversations = chatHelper.loadConversation(userId, page, size);
+        if (listener != null) {
             listener.onLoadCompleted(conversations);
         }
     }
 
     @Override
     public void addOnConversationChangeListener(OnConversationChangeListener onConversationChangeListener) {
-
+        this.onConversationChangeListeners.add(onConversationChangeListener);
     }
 }

@@ -47,8 +47,8 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
         mRecyclerView.setPullRefreshEnabled(false);
         mRecyclerView.setOnLoadMoreListener(this);
         ImClient.getInstance().chatManager().loadConversation(0, 10, conversationList -> {
-            ConversationAdapter conversationAdapter = new ConversationAdapter(MainActivity.this, conversationList);
-            LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(conversationAdapter);
+            mConversationAdapter = new ConversationAdapter(MainActivity.this, conversationList);
+            LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(mConversationAdapter);
             mRecyclerView.setAdapter(mLAdapter);
             mLAdapter.setOnItemClickListener(MainActivity.this);
             mLAdapter.setOnItemLongClickListener(MainActivity.this);
