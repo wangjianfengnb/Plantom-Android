@@ -8,7 +8,7 @@ public class Conversation {
 
     private long conversationId;
 
-    private int type;
+    private int conversationType;
 
     private String targetId;
 
@@ -16,7 +16,9 @@ public class Conversation {
 
     private String conversationName;
 
-    private ChatMessage lastMessage;
+    private long lastUpdate;
+
+    private String lastMessage;
 
     public String getConversationName() {
         return conversationName;
@@ -34,12 +36,12 @@ public class Conversation {
         this.conversationId = conversationId;
     }
 
-    public int getType() {
-        return type;
+    public int getConversationType() {
+        return conversationType;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public void setConversationType(int conversationType) {
+        this.conversationType = conversationType;
     }
 
     public String getTargetId() {
@@ -50,7 +52,7 @@ public class Conversation {
         this.targetId = targetId;
     }
 
-    public void setLastMessage(ChatMessage lastMessage) {
+    public void setLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
     }
 
@@ -62,15 +64,15 @@ public class Conversation {
         this.unread = unread;
     }
 
-    public TextMessage createTextMessage(String content) {
-        TextMessage message = new TextMessage();
-        message.setType(type);
-        message.setReceiverId(targetId);
-        message.setContent(content);
-        return message;
+    public String getLastMessage() {
+        return lastMessage;
     }
 
-    public ChatMessage getLastMessage() {
-        return lastMessage;
+    public long getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(long lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 }

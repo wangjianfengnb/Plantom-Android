@@ -3,13 +3,10 @@ package com.phantom.client.manager;
 import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.phantom.client.ConnectionManager;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.request.AuthenticateResponse;
 import com.phantom.client.model.request.Message;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.phantom.client.network.ConnectionManager;
 
 public class AuthenticateManager implements MessageHandler {
 
@@ -37,12 +34,5 @@ public class AuthenticateManager implements MessageHandler {
             }
             ConnectionManager.getInstance().reauthenticate();
         }
-    }
-
-    @Override
-    public Set<Integer> supportMessageTypes() {
-        HashSet<Integer> types = new HashSet<>();
-        types.add(Constants.REQUEST_TYPE_AUTHENTICATE);
-        return types;
     }
 }

@@ -1,20 +1,13 @@
-package com.phantom.client;
+package com.phantom.client.network;
 
 
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.phantom.client.model.request.AuthenticateResponse;
-import com.phantom.client.model.request.C2CMessageResponse;
-import com.phantom.client.model.request.C2GMessageResponse;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.request.FetchMessageRequest;
-import com.phantom.client.model.request.FetchMessageResponse;
-import com.phantom.client.model.request.InformFetchMessageResponse;
 import com.phantom.client.model.request.Message;
-import com.phantom.client.model.request.OfflineMessage;
 import com.phantom.client.utils.HttpUtil;
 
 import io.netty.bootstrap.Bootstrap;
@@ -28,8 +21,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;

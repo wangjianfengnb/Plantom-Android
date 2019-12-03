@@ -11,17 +11,15 @@ import com.github.jdsjlzx.interfaces.OnItemLongClickListener;
 import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
-import com.phantom.client.model.Conversation;
-import com.phantom.client.model.TextMessage;
+import com.phantom.client.ImClient;
 import com.phantom.sample.adapter.ConversationAdapter;
 import com.phantom.sample.widget.DividerItemDecoration;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class MainActivity extends BaseActivity implements OnItemClickListener, OnItemLongClickListener, OnLoadMoreListener {
 
     private LRecyclerView mRecyclerView;
+
+    private ConversationAdapter mConversationAdapter;
 
     @Override
     protected void init() {
@@ -46,36 +44,27 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
                 }
             }
         });
-        ConversationAdapter conversationAdapter = new ConversationAdapter(this, createConversation());
-        LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(conversationAdapter);
-        mRecyclerView.setAdapter(mLAdapter);
         mRecyclerView.setPullRefreshEnabled(false);
-        mLAdapter.setOnItemClickListener(this);
-        mLAdapter.setOnItemLongClickListener(this);
         mRecyclerView.setOnLoadMoreListener(this);
-    }
+        ImClient.getInstance().chatManager().loadConversation(0, 10, conversationList -> {
+            ConversationAdapter conversationAdapter = new ConversationAdapter(MainActivity.this, conversationList);
+            LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(conversationAdapter);
+            mRecyclerView.setAdapter(mLAdapter);
+            mLAdapter.setOnItemClickListener(MainActivity.this);
+            mLAdapter.setOnItemLongClickListener(MainActivity.this);
+        });
 
-    private List<Conversation> createConversation() {
-        Conversation c1 = new Conversation();
-        c1.setConversationId(1L);
-        c1.setConversationName("1号玩家");
-        TextMessage message = new TextMessage();
-        message.setContent("吃饭了吗");
-        c1.setLastMessage(message);
-        c1.setTargetId("123");
-        c1.setType(Conversation.TYPE_C2C);
-        c1.setUnread(6);
 
-        Conversation c2 = new Conversation();
-        c2.setConversationId(1L);
-        c2.setConversationName("2号玩家");
-        TextMessage message2 = new TextMessage();
-        message2.setContent("吃饭了吗");
-        c2.setLastMessage(message2);
-        c2.setTargetId("333");
-        c2.setType(Conversation.TYPE_C2C);
-        c2.setUnread(3);
-        return Arrays.asList(c1, c2);
+        ImClient.getInstance().chatManager().addOnConversationChangeListener((conversation, isNew) -> {
+            if (isNew) {
+                mConversationAdapter.addFirst(conversation);
+            } else {
+                mConversationAdapter.update(conversation);
+            }
+            mConversationAdapter.notifyDataSetChanged();
+        });
+
+
     }
 
     @Override

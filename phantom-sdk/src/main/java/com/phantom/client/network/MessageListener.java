@@ -1,4 +1,4 @@
-package com.phantom.client;
+package com.phantom.client.network;
 
 import com.phantom.client.model.request.Message;
 

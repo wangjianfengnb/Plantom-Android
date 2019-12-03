@@ -7,6 +7,4 @@ import java.util.Set;
 
 public interface MessageHandler {
     void onMessage(Message message) throws InvalidProtocolBufferException;
-
-    Set<Integer> supportMessageTypes();
 }

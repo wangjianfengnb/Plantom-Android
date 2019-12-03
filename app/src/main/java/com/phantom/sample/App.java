@@ -2,6 +2,8 @@ package com.phantom.sample;
 
 import androidx.multidex.MultiDex;
 
+import com.facebook.stetho.Stetho;
+
 /**
  * 启动Application
  */
@@ -14,6 +16,7 @@ public class App extends android.app.Application {
         super.onCreate();
         MultiDex.install(this);
         mContext = this;
+        Stetho.initializeWithDefaults(this);
     }
 
     public static App getContext() {

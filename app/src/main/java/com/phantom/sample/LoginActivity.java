@@ -28,5 +28,9 @@ public class LoginActivity extends BaseActivity {
             ImClient.getInstance().authenticate(username, "random");
             startActivity(MainActivity.class);
         });
+
+
+
+
     }
 }
