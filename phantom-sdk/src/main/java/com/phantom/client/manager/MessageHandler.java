@@ -1,10 +1,8 @@
 package com.phantom.client.manager;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.phantom.client.model.request.Message;
-
-import java.util.Set;
+import com.phantom.client.model.request.NetworkMessage;
 
 public interface MessageHandler {
-    void onMessage(Message message) throws InvalidProtocolBufferException;
+    void onMessage(NetworkMessage networkMessage) throws InvalidProtocolBufferException;
 }

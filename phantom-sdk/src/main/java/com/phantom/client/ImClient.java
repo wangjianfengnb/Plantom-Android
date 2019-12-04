@@ -10,7 +10,7 @@ import com.phantom.client.manager.MessageHandler;
 import com.phantom.client.model.ChatMessage;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.request.AuthenticateRequest;
-import com.phantom.client.model.request.Message;
+import com.phantom.client.model.request.NetworkMessage;
 import com.phantom.client.network.ConnectionManager;
 
 /**
@@ -41,7 +41,7 @@ public class ImClient {
      */
     public void initialize(Context context, String serverApi) {
         ConnectionManager connectionManager = ConnectionManager.getInstance();
-        connectionManager.initialize(serverApi);
+        connectionManager.initialize(context, serverApi);
         ManagerFactoryBean.init(context);
         connectionManager.setMessageListener(message -> {
             try {
@@ -71,8 +71,8 @@ public class ImClient {
                         .setToken(token)
                         .setUid(uid)
                         .build();
-        Message message = Message.buildAuthenticateRequest(authenticateRequest);
-        connectManager.authenticate(message);
+        NetworkMessage networkMessage = NetworkMessage.buildAuthenticateRequest(authenticateRequest);
+        connectManager.authenticate(networkMessage);
     }
 
     /**
@@ -82,21 +82,21 @@ public class ImClient {
      */
     public void sendMessage(ChatMessage chatMessage) {
 //        ConnectionManager connectManager = ConnectionManager.getInstance();
-//        Message message = null;
+//        NetworkMessage message = null;
 //        if (chatMessage.getType() == Conversation.TYPE_C2C) {
 //            C2CMessageRequest request = C2CMessageRequest.newBuilder()
 //                    .setContent(chatMessage.getMessageContent())
 //                    .setSenderId(chatMessage.getSenderId())
 //                    .setReceiverId(chatMessage.getReceiverId())
 //                    .build();
-//            message = Message.buildC2CMessageRequest(request);
+//            message = NetworkMessage.buildC2CMessageRequest(request);
 //        } else if (chatMessage.getType() == Conversation.TYPE_C2G) {
 //            C2GMessageRequest request = C2GMessageRequest.newBuilder()
 //                    .setContent(chatMessage.getMessageContent())
 //                    .setSenderId(chatMessage.getSenderId())
 //                    .setGroupId(chatMessage.getReceiverId())
 //                    .build();
-//            message = Message.buildC2gMessageRequest(request);
+//            message = NetworkMessage.buildC2gMessageRequest(request);
 //        }
 //        if (message != null) {
 //            connectManager.sendMessage(message);

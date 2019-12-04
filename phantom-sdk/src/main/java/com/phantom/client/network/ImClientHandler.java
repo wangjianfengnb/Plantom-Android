@@ -2,7 +2,7 @@ package com.phantom.client.network;
 
 import android.util.Log;
 
-import com.phantom.client.model.request.Message;
+import com.phantom.client.model.request.NetworkMessage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,8 +30,8 @@ public class ImClientHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         try {
             ByteBuf byteBuf = (ByteBuf) msg;
-            Message message = Message.parse(byteBuf);
-            ConnectionManager.getInstance().onReceiveMessage(message);
+            NetworkMessage networkMessage = NetworkMessage.parse(byteBuf);
+            ConnectionManager.getInstance().onReceiveMessage(networkMessage);
         } finally {
             ReferenceCountUtil.release(msg);
         }

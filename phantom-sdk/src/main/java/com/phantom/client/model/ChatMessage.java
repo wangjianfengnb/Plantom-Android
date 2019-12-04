@@ -1,5 +1,7 @@
 package com.phantom.client.model;
 
+import com.alibaba.fastjson.JSONObject;
+import com.phantom.client.model.message.Message;
 import com.phantom.client.model.request.OfflineMessage;
 
 public class ChatMessage {
@@ -9,10 +11,9 @@ public class ChatMessage {
     public static final int STATUS_SEND_SUCCESS = 3;
     public static final int STATUS_SEND_FAILURE = 4;
 
-
     private Long id;
 
-    private Long userId;
+    private String userId;
 
     private Long messageId;
 
@@ -32,11 +33,21 @@ public class ChatMessage {
 
     private String messageContent;
 
-    public Long getUserId() {
+    private String groupId;
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
@@ -131,7 +142,25 @@ public class ChatMessage {
         message.setTimestamp(msg.getTimestamp());
         message.setMessageStatus(STATUS_SEND_SUCCESS);
         message.setCrc("testCrc");
+        message.setGroupId(msg.getGroupId());
         return message;
     }
 
+    public Message toMessage(Long conversationId) {
+        JSONObject obj = JSONObject.parseObject(messageContent);
+        Integer type = obj.getInteger("type");
+        if (type == Message.TEXT) {
+            Message message = new Message();
+            message.setSenderId(senderId);
+            message.setReceiverId(receiverId);
+            message.setMessageId(messageId);
+            message.setConversationId(conversationId);
+            message.setCrc(crc);
+            message.setStatus(messageStatus);
+            message.setContent(obj.getString("content"));
+            message.setType(type);
+            return message;
+        }
+        return null;
+    }
 }

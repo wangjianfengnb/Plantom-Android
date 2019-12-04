@@ -1,13 +1,15 @@
 package com.phantom.client.network;
 
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.request.FetchMessageRequest;
-import com.phantom.client.model.request.Message;
+import com.phantom.client.model.request.NetworkMessage;
+import com.phantom.client.ssl.SslEngineFactory;
 import com.phantom.client.utils.HttpUtil;
 
 import io.netty.bootstrap.Bootstrap;
@@ -20,6 +22,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.ssl.SslHandler;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -48,7 +51,7 @@ public class ConnectionManager {
     /**
      * 消息发送队列
      */
-    private ArrayBlockingQueue<Message> messages = new ArrayBlockingQueue<>(1000);
+    private ArrayBlockingQueue<NetworkMessage> networkMessages = new ArrayBlockingQueue<>(1000);
 
     /**
      * 线程池
@@ -77,17 +80,19 @@ public class ConnectionManager {
     /**
      * 认证消息
      */
-    private Message authenticateMessage;
+    private NetworkMessage authenticateNetworkMessage;
 
     /**
      * 获取接入服务地址的接口
      */
     private String serverApi;
+    private Context context;
 
     private ConnectionManager() {
     }
 
-    public void initialize(String serverApi) {
+    public void initialize(Context context, String serverApi) {
+        this.context = context;
         this.serverApi = serverApi;
         new ConnectThread().start();
         new SendMessageThread().start();
@@ -110,7 +115,7 @@ public class ConnectionManager {
         this.channel = channel;
         if (channel != null) {
             Log.i(TAG, "发送认证请求...");
-            channel.writeAndFlush(authenticateMessage.getBuffer());
+            channel.writeAndFlush(authenticateNetworkMessage.getBuffer());
         } else {
             isAuthenticate = false;
             Log.i(TAG, "接入系统宕机了，唤醒线程进行连接...");
@@ -123,10 +128,10 @@ public class ConnectionManager {
     /**
      * 发送消息
      *
-     * @param message 消息
+     * @param networkMessage 消息
      */
-    public void sendMessage(Message message) {
-        messages.add(message);
+    public void sendMessage(NetworkMessage networkMessage) {
+        networkMessages.add(networkMessage);
     }
 
     public void shutdown() {
@@ -144,11 +149,11 @@ public class ConnectionManager {
     /**
      * 收到消息处理
      *
-     * @param message 消息
+     * @param networkMessage 消息
      */
-    public void onReceiveMessage(Message message) {
+    public void onReceiveMessage(NetworkMessage networkMessage) {
         if (messageListeners != null) {
-            messageListeners.onMessage(message);
+            messageListeners.onMessage(networkMessage);
         }
     }
 
@@ -164,23 +169,23 @@ public class ConnectionManager {
                 .setTimestamp(timestamp)
                 .setUid(uid)
                 .build();
-        this.sendMessage(Message.buildFetcherMessageRequest(request));
+        this.sendMessage(NetworkMessage.buildFetcherMessageRequest(request));
     }
 
     /**
      * 保存认证信息
      *
-     * @param message message
+     * @param networkMessage networkMessage
      */
-    public void authenticate(Message message) {
-        this.authenticateMessage = message;
+    public void authenticate(NetworkMessage networkMessage) {
+        this.authenticateNetworkMessage = networkMessage;
         synchronized (this) {
             notifyAll();
         }
     }
 
     public void reauthenticate() {
-        channel.writeAndFlush(authenticateMessage.getBuffer());
+        channel.writeAndFlush(authenticateNetworkMessage.getBuffer());
     }
 
     /**
@@ -199,7 +204,7 @@ public class ConnectionManager {
                         Thread.sleep(5 * 1000);
                         continue;
                     }
-                    if(authenticateMessage == null){
+                    if (authenticateNetworkMessage == null) {
                         synchronized (ConnectionManager.this) {
                             Log.i(TAG, "还没有认证消息休眠......");
                             ConnectionManager.this.wait();
@@ -219,6 +224,7 @@ public class ConnectionManager {
                             .handler(new ChannelInitializer<SocketChannel>() {
                                 @Override
                                 protected void initChannel(SocketChannel ch) throws Exception {
+                                    ch.pipeline().addLast(new SslHandler(SslEngineFactory.getEngine(context)));
                                     ch.pipeline().addLast(new DelimiterBasedFrameDecoder(4096,
                                             Unpooled.copiedBuffer(Constants.DELIMITER)));
                                     ch.pipeline().addLast(new ImClientHandler());
@@ -250,7 +256,7 @@ public class ConnectionManager {
         public void run() {
             while (!shutdown) {
                 try {
-                    Message msg = messages.poll(10, TimeUnit.SECONDS);
+                    NetworkMessage msg = networkMessages.poll(10, TimeUnit.SECONDS);
                     if (msg == null) {
                         continue;
                     }

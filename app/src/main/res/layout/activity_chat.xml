@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/include_custom_toolbar" />
+
+    <com.github.jdsjlzx.recyclerview.LRecyclerView
+        android:id="@id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+
+    <LinearLayout
+        android:id="@+id/chat_input_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/x20">
+
+        <EditText
+            android:id="@+id/chat_input_et"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/x110"
+            android:layout_marginStart="@dimen/x10"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_marginEnd="@dimen/x10"
+            android:layout_marginRight="@dimen/x10"
+            android:layout_weight="1"
+            android:background="@drawable/bg_chat_input_et"
+            android:imeOptions="actionSend"
+            android:inputType="textMultiLine"
+            android:maxHeight="@dimen/y300"
+            android:padding="@dimen/x20"
+            android:scrollHorizontally="false"
+            android:textColor="@color/black"
+            android:textCursorDrawable="@null"
+            android:visibility="visible"
+            tools:text="1234" />
+
+
+        <LinearLayout
+            android:id="@+id/chat_send_message_label"
+            android:layout_width="@dimen/x130"
+            android:layout_height="@dimen/x110"
+            android:gravity="bottom|center_horizontal"
+            android:visibility="visible">
+
+            <Button
+                android:id="@+id/chat_send_message_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/btn_chat_send"
+                android:gravity="center"
+                android:text="发送"
+                android:textColor="@color/default_text_color"
+                android:textSize="@dimen/text_35" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

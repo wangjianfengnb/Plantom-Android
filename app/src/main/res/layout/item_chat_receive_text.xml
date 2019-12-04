@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="start"
+    android:orientation="horizontal"
+    android:padding="@dimen/x20">
+
+    <ImageView
+        android:id="@+id/item_chat_avatar"
+        android:layout_width="@dimen/x100"
+        android:layout_height="@dimen/x100"
+        android:layout_marginLeft="@dimen/x20"
+        android:layout_marginStart="@dimen/x20"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_avatar_default" />
+
+    <TextView
+        android:id="@+id/item_chat_receive_text_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x20"
+        android:layout_marginStart="@dimen/x20"
+        android:background="@drawable/bg_chat_receive_text"
+        android:gravity="start|center_vertical"
+        android:maxWidth="@dimen/x700"
+        android:paddingBottom="@dimen/y20"
+        android:paddingEnd="@dimen/x20"
+        android:paddingLeft="@dimen/x30"
+        android:paddingRight="@dimen/x20"
+        android:paddingStart="@dimen/x30"
+        android:paddingTop="@dimen/y20"
+        android:textColor="@color/black"
+        android:textSize="@dimen/text_45"
+        tools:text="你多少分爱上DOI犯囧阿斯利康打飞机拉斯的发送到发送到发送到发手动阀手动阀" />
+
+
+</LinearLayout>

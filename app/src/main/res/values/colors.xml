@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#6200EE</color>
-    <color name="colorPrimaryDark">#3700B3</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorPrimary">#965A45</color>
+    <color name="colorPrimaryDark">#965A45</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+    <color name="text">#222222</color>
+    <color name="textGray">#808080</color>
+    <color name="hint">#999999</color>
+    <color name="colorSelected">#11000000</color>
+    <color name="colorGreen">#FFA800</color>
+    <color name="tab_color_line">#88884D39</color>
+    <color name="background_yellow">#fffcfa</color>
 
     <color name="bg_activity">#F0F0F0</color>
     <color name="colorPrimary_press">#1973f0</color>
-    <color name="transparent">#00000000</color>
-    <color name="white">#FFFFFF</color>
     <color name="black">#333333</color>
     <color name="gray">#e0e0e0</color>
     <color name="gray_alpha">#55c0c0c0</color>
@@ -62,7 +69,6 @@
     <color name="fix_record_red">#E51C23</color>
     <color name="fix_record_orange">#EB8713</color>
     <color name="fix_record_green">#259B24</color>
-
 
 
     <!--默认背景颜色-->

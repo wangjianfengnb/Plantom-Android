@@ -1,6 +1,7 @@
 package com.phantom.sample;
 
 import android.graphics.Canvas;
+import android.os.Bundle;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -12,6 +13,7 @@ import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.phantom.client.ImClient;
+import com.phantom.client.model.Conversation;
 import com.phantom.sample.adapter.ConversationAdapter;
 import com.phantom.sample.widget.DividerItemDecoration;
 
@@ -23,6 +25,7 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
 
     @Override
     protected void init() {
+        setTitle("幻影(15)");
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this,
@@ -46,14 +49,13 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
         });
         mRecyclerView.setPullRefreshEnabled(false);
         mRecyclerView.setOnLoadMoreListener(this);
-        ImClient.getInstance().chatManager().loadConversation(0, 10, conversationList -> {
+        ImClient.getInstance().chatManager().loadConversation(1, 10, conversationList -> {
             mConversationAdapter = new ConversationAdapter(MainActivity.this, conversationList);
             LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(mConversationAdapter);
             mRecyclerView.setAdapter(mLAdapter);
             mLAdapter.setOnItemClickListener(MainActivity.this);
             mLAdapter.setOnItemLongClickListener(MainActivity.this);
         });
-
 
         ImClient.getInstance().chatManager().addOnConversationChangeListener((conversation, isNew) -> {
             if (isNew) {
@@ -63,8 +65,6 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
             }
             mConversationAdapter.notifyDataSetChanged();
         });
-
-
     }
 
     @Override
@@ -74,12 +74,16 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
 
     @Override
     public void onItemClick(View view, int position) {
-
+        showToast("点击了会话列表");
+        Bundle bundle = new Bundle();
+        Conversation conversation = mConversationAdapter.getItem(position);
+        bundle.putParcelable("conversation", conversation);
+        startActivity(ChatActivity.class, bundle);
     }
 
     @Override
     public void onItemLongClick(View view, int position) {
-
+        showToast("长按了会话列表");
     }
 
     @Override

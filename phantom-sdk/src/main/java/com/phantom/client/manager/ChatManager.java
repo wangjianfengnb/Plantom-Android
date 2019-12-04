@@ -8,18 +8,22 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.phantom.client.model.ChatMessage;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.Conversation;
+import com.phantom.client.model.message.Message;
 import com.phantom.client.model.request.C2CMessageResponse;
 import com.phantom.client.model.request.C2GMessageResponse;
 import com.phantom.client.model.request.FetchMessageResponse;
 import com.phantom.client.model.request.InformFetchMessageResponse;
-import com.phantom.client.model.request.Message;
+import com.phantom.client.model.request.NetworkMessage;
 import com.phantom.client.model.request.OfflineMessage;
 import com.phantom.client.network.ConnectionManager;
 import com.phantom.client.sqlite.ChatHelper;
 import com.phantom.client.utils.RxHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ChatManager implements MessageHandler, IChatManager {
 
@@ -40,6 +44,8 @@ public class ChatManager implements MessageHandler, IChatManager {
     private ChatHelper chatHelper;
 
     private String userId;
+
+    private Map<Long, Long> conversationMaxMessageId = new ConcurrentHashMap<>();
 
     ChatManager(Context context) {
         chatHelper = new ChatHelper(context);
@@ -80,10 +86,10 @@ public class ChatManager implements MessageHandler, IChatManager {
     }
 
     @Override
-    public void onMessage(Message message) throws InvalidProtocolBufferException {
-        int requestType = message.getRequestType();
+    public void onMessage(NetworkMessage networkMessage) throws InvalidProtocolBufferException {
+        int requestType = networkMessage.getRequestType();
         if (Constants.REQUEST_TYPE_C2C_SEND == requestType) {
-            byte[] body = message.getBody();
+            byte[] body = networkMessage.getBody();
             C2CMessageResponse c2CMessageResponse = C2CMessageResponse.parseFrom(body);
             if (c2CMessageResponse.getStatus() == Constants.RESPONSE_STATUS_OK) {
                 Log.i(TAG, "发送单聊消息成功...");
@@ -93,10 +99,10 @@ public class ChatManager implements MessageHandler, IChatManager {
         } else if (Constants.REQUEST_TYPE_INFORM_FETCH == requestType) {
             Log.i(TAG, "收到抓取离线消息的通知...");
             InformFetchMessageResponse informFetchMessageResponse =
-                    InformFetchMessageResponse.parseFrom(message.getBody());
+                    InformFetchMessageResponse.parseFrom(networkMessage.getBody());
             fetchMessage(informFetchMessageResponse.getUid());
         } else if (Constants.REQUEST_TYPE_MESSAGE_FETCH == requestType) {
-            FetchMessageResponse response = FetchMessageResponse.parseFrom(message.getBody());
+            FetchMessageResponse response = FetchMessageResponse.parseFrom(networkMessage.getBody());
             Log.i(TAG, "收到抓取离线消息的响应，是否结果为空：" + response.getIsEmpty());
             if (!response.getIsEmpty()) {
                 synchronized (ConnectionManager.class) {
@@ -116,7 +122,7 @@ public class ChatManager implements MessageHandler, IChatManager {
                 }
             }
         } else if (Constants.REQUEST_TYPE_C2G_SEND == requestType) {
-            byte[] body = message.getBody();
+            byte[] body = networkMessage.getBody();
             C2GMessageResponse c2GMessageResponse = C2GMessageResponse.parseFrom(body);
             if (c2GMessageResponse.getStatus() == Constants.RESPONSE_STATUS_OK) {
                 Log.i(TAG, "发送群聊消息成功...");
@@ -129,6 +135,7 @@ public class ChatManager implements MessageHandler, IChatManager {
     private void handleMessage(OfflineMessage msg) {
         Conversation conversation = getOrCreateConversation(msg);
         ChatMessage chatMessage = ChatMessage.parse(conversation, msg);
+        chatMessage.setUserId(userId);
         chatHelper.saveMessage(chatMessage);
     }
 
@@ -176,6 +183,7 @@ public class ChatManager implements MessageHandler, IChatManager {
                 }
             }
         }
+        page--;
         List<Conversation> conversations = chatHelper.loadConversation(userId, page, size);
         if (listener != null) {
             listener.onLoadCompleted(conversations);
@@ -185,5 +193,37 @@ public class ChatManager implements MessageHandler, IChatManager {
     @Override
     public void addOnConversationChangeListener(OnConversationChangeListener onConversationChangeListener) {
         this.onConversationChangeListeners.add(onConversationChangeListener);
+    }
+
+    @Override
+    public void loadMessage(Conversation conversation, OnLoadMessageListener listener) {
+        // 如果是单聊，则根据目标用户id，消息类型是单聊分页查找。
+        if (conversation.getConversationType() == Conversation.TYPE_C2C) {
+            Long maxId = conversationMaxMessageId.get(conversation.getConversationId());
+            if (maxId == null) {
+                maxId = 0L;
+                conversationMaxMessageId.put(conversation.getConversationId(), maxId);
+            }
+            List<ChatMessage> chatMessages = chatHelper.loadC2CMessage(userId, conversation.getTargetId(), maxId);
+            if (!chatMessages.isEmpty()) {
+                maxId = chatMessages.get(0).getId();
+                conversationMaxMessageId.put(conversation.getConversationId(), maxId);
+                List<Message> messages = new ArrayList<>();
+                for (ChatMessage msg : chatMessages) {
+                    Message message = msg.toMessage(conversation.getConversationId());
+                    messages.add(message);
+                }
+                if (listener != null) {
+                    listener.onMessage(messages);
+                }
+            }
+        } else if (conversation.getConversationType() == Conversation.TYPE_C2G) {
+            // TODO 群聊
+        }
+    }
+
+    @Override
+    public void closeConversation(Long conversationId) {
+        conversationMaxMessageId.remove(conversationId);
     }
 }

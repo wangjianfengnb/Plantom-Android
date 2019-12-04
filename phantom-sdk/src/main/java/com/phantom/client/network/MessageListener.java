@@ -1,6 +1,6 @@
 package com.phantom.client.network;
 
-import com.phantom.client.model.request.Message;
+import com.phantom.client.model.request.NetworkMessage;
 
 /**
  * 消息监听器
@@ -13,8 +13,8 @@ public interface MessageListener {
     /**
      * 收到消息
      *
-     * @param message 消息
+     * @param networkMessage 消息
      */
-    void onMessage(Message message);
+    void onMessage(NetworkMessage networkMessage);
 
 }

@@ -37,7 +37,7 @@ public class ChatHelper extends SQLiteOpenHelper {
                 ");");
         db.execSQL("CREATE TABLE message(" +
                 "id integer primary key autoincrement," +
-                "user_id integer," +
+                "user_id varchar(20)," +
                 "message_id integer," +
                 "sender_id varchar(20)," +
                 "receiver_id varchar(20)," +
@@ -46,7 +46,8 @@ public class ChatHelper extends SQLiteOpenHelper {
                 "message_status integer," +
                 "timestamp integer," +
                 "sequence integer," +
-                "crc varchar(32));");
+                "crc varchar(32)," +
+                "group_id varchar(20));");
         db.execSQL("CREATE INDEX idx_target_id ON conversation(target_id);");
         db.execSQL("CREATE INDEX idx_sender_id ON message(sender_id);");
         db.execSQL("CREATE INDEX idx_receiver_id ON message(receiver_id);");
@@ -180,8 +181,6 @@ public class ChatHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query("conversation", null, "user_id = ?",
                 new String[]{userId}, null, null,
                 "last_update DESC limit " + size + " offset " + page * size);
-
-
         List<Conversation> result = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
@@ -202,6 +201,53 @@ public class ChatHelper extends SQLiteOpenHelper {
                 conversation.setLastMessage(lastMessage);
                 conversation.setUserId(userId);
                 result.add(conversation);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return result;
+    }
+
+    /**
+     * 加载单聊消息
+     *
+     * @param userId   用户ID
+     * @param targetId 目标ID
+     * @param maxId    最小消息ID
+     * @return 消息列表
+     */
+    public List<ChatMessage> loadC2CMessage(String userId, String targetId, Long maxId) {
+        Cursor cursor = db.query("message", null,
+                "user_id = ? AND message_type = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) AND id > ?",
+                new String[]{userId, String.valueOf(Conversation.TYPE_C2C), userId, targetId, targetId, userId, String.valueOf(maxId)},
+                null, null,
+                "id DESC limit 30");
+        List<ChatMessage> result = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            do {
+                long id = cursor.getLong(cursor.getColumnIndex("id"));
+                long messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
+                String senderId = cursor.getString(cursor.getColumnIndex("sender_id"));
+                String receiverId = cursor.getString(cursor.getColumnIndex("receiver_id"));
+                int messageType = cursor.getInt(cursor.getColumnIndex("message_type"));
+                String messageContent = cursor.getString(cursor.getColumnIndex("message_content"));
+                int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
+                long timestamp = cursor.getLong(cursor.getColumnIndex("timestamp"));
+                long sequence = cursor.getLong(cursor.getColumnIndex("sequence"));
+                String crc = cursor.getString(cursor.getColumnIndex("crc"));
+                String groupId = cursor.getString(cursor.getColumnIndex("group_id"));
+                ChatMessage message = new ChatMessage();
+                message.setId(id);
+                message.setMessageId(messageId);
+                message.setSenderId(senderId);
+                message.setReceiverId(receiverId);
+                message.setMessageType(messageType);
+                message.setMessageContent(messageContent);
+                message.setMessageStatus(messageStatus);
+                message.setTimestamp(timestamp);
+                message.setCrc(crc);
+                message.setGroupId(groupId);
+                message.setSequence(sequence);
+                result.add(message);
             } while (cursor.moveToNext());
         }
         cursor.close();

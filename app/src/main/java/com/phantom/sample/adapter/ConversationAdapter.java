@@ -15,6 +15,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.phantom.client.model.Conversation;
 import com.phantom.sample.App;
 import com.phantom.sample.R;
+import com.phantom.sample.constants.Data;
 import com.phantom.sample.widget.GlideRoundTransform;
 
 import java.text.ParseException;
@@ -36,7 +37,7 @@ public class ConversationAdapter extends BaseAdapter<Conversation, ConversationA
     public void bind(ConversationHolder holder, int position) {
         Conversation conversation = mData.get(position);
         Glide.with(App.getContext())
-                .load(getAvatar())
+                .load(Data.getAvatar())
                 .transform(new GlideRoundTransform(mContext, 4))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .error(R.drawable.ic_avatar_default)
@@ -92,11 +93,6 @@ public class ConversationAdapter extends BaseAdapter<Conversation, ConversationA
             message = itemView.findViewById(R.id.conversation_message);
         }
     }
-
-    private String getAvatar() {
-        return "http://ww1.sinaimg.cn/large/0065oQSqly1g2pquqlp0nj30n00yiq8u.jpg";
-    }
-
 
     /**
      * 格式化时间

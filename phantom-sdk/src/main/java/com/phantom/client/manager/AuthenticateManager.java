@@ -5,7 +5,7 @@ import android.util.Log;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.request.AuthenticateResponse;
-import com.phantom.client.model.request.Message;
+import com.phantom.client.model.request.NetworkMessage;
 import com.phantom.client.network.ConnectionManager;
 
 public class AuthenticateManager implements MessageHandler {
@@ -18,8 +18,8 @@ public class AuthenticateManager implements MessageHandler {
     }
 
     @Override
-    public void onMessage(Message message) throws InvalidProtocolBufferException {
-        byte[] body = message.getBody();
+    public void onMessage(NetworkMessage networkMessage) throws InvalidProtocolBufferException {
+        byte[] body = networkMessage.getBody();
         AuthenticateResponse authenticateResponse = AuthenticateResponse.parseFrom(body);
         if (authenticateResponse.getStatus() == Constants.RESPONSE_STATUS_OK) {
             ConnectionManager.getInstance().setAuthenticate(true);

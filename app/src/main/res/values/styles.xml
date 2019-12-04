@@ -30,4 +30,5 @@
         <item name="android:windowExitAnimation">@anim/anim_up_out</item>
     </style>
 
+
 </resources>

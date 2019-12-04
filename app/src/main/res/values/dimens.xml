@@ -34,4 +34,8 @@
     <dimen name="text_300">@dimen/x300</dimen>
     <dimen name="radius">5dp</dimen>
     <dimen name="progress_circle_radius">34dp</dimen>
+
+    <dimen name="text_big">@dimen/x43</dimen>
+    <dimen name="text_normal">@dimen/x35</dimen>
+    <dimen name="text_small">@dimen/x30</dimen>
 </resources>
