@@ -1,6 +1,6 @@
 package com.phantom.client.network;
 
-import com.phantom.client.model.request.NetworkMessage;
+import com.phantom.client.model.NetworkMessage;
 
 /**
  * 消息监听器

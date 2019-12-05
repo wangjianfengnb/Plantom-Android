@@ -23,7 +23,9 @@ public class ChatAdapter extends BaseAdapter<Message, ChatAdapter.ChatHolder> {
     @Override
     public void bind(ChatHolder chatHolder, int position) {
         BaseMessage message = MessageFactory.getMessage(mData.get(position));
-        message.bindView(chatHolder.root);
+        if (message != null) {
+            message.bindView(chatHolder.root);
+        }
     }
 
     @NonNull
@@ -31,6 +33,10 @@ public class ChatAdapter extends BaseAdapter<Message, ChatAdapter.ChatHolder> {
     public ChatHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.chat_item, parent, false);
         return new ChatHolder(view);
+    }
+
+    public void addFirst(Message message) {
+        mData.add(0, message);
     }
 
     static class ChatHolder extends RecyclerView.ViewHolder {

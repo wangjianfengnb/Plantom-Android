@@ -42,11 +42,11 @@ public class ConversationAdapter extends BaseAdapter<Conversation, ConversationA
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .error(R.drawable.ic_avatar_default)
                 .into(holder.avatar);
+        holder.badge.setVisibility(conversation.getUnread() == 0 ? View.GONE : View.VISIBLE);
         holder.badge.setText(String.valueOf(conversation.getUnread()));
         holder.message.setText(conversation.getLastMessage());
         holder.name.setText(conversation.getConversationName());
         holder.time.setText(getCurrentTime(convertTime(conversation.getLastUpdate())));
-
     }
 
     @NonNull
@@ -69,6 +69,14 @@ public class ConversationAdapter extends BaseAdapter<Conversation, ConversationA
             }
         }
         Collections.sort(mData, (o1, o2) -> (int) (o2.getLastUpdate() - o1.getLastUpdate()));
+    }
+
+    public int getTotalUnRead() {
+        int result = 0;
+        for (Conversation conversation : mData) {
+            result += conversation.getUnread();
+        }
+        return result;
     }
 
 

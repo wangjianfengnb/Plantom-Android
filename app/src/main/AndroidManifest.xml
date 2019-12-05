@@ -12,7 +12,9 @@
         android:roundIcon="@drawable/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity"  android:windowSoftInputMode="stateVisible|adjustUnspecified">
+        <activity
+            android:name=".SplashActivity"
+            android:windowSoftInputMode="stateVisible|adjustUnspecified">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -21,6 +23,8 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".ChatActivity" />
+        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity" />
     </application>
 
 </manifest>

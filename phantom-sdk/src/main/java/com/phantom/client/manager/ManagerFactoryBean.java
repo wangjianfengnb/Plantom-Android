@@ -11,8 +11,8 @@ public class ManagerFactoryBean {
 
     private static Map<Integer, MessageHandler> messageHandlers = new HashMap<>();
 
-    public static void init(Context context) {
-        ChatManager chatManager = new ChatManager(context);
+    public static void init(Context context, String serverApi) {
+        ChatManager chatManager = new ChatManager(context, serverApi);
         AuthenticateManager authenticateManager = new AuthenticateManager(chatManager);
         messageHandlers.put(Constants.REQUEST_TYPE_AUTHENTICATE, authenticateManager);
         messageHandlers.put(Constants.REQUEST_TYPE_INFORM_FETCH, chatManager);

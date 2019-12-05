@@ -4,20 +4,24 @@ import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.jdsjlzx.interfaces.OnItemClickListener;
 import com.github.jdsjlzx.interfaces.OnItemLongClickListener;
-import com.github.jdsjlzx.interfaces.OnLoadMoreListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.phantom.client.ImClient;
 import com.phantom.client.model.Conversation;
 import com.phantom.sample.adapter.ConversationAdapter;
+import com.phantom.sample.api.UserResponse;
+import com.phantom.sample.constants.Data;
 import com.phantom.sample.widget.DividerItemDecoration;
 
-public class MainActivity extends BaseActivity implements OnItemClickListener, OnItemLongClickListener, OnLoadMoreListener {
+
+public class MainActivity extends BaseActivity implements OnItemClickListener, OnItemLongClickListener {
 
     private LRecyclerView mRecyclerView;
 
@@ -25,13 +29,20 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
 
     @Override
     protected void init() {
-        setTitle("幻影(15)");
+        initTitle(0);
+        Bundle extras = getIntent().getExtras();
+        assert extras != null;
+        String account = extras.getString("userInfo");
+        UserResponse userResponse = JSONObject.parseObject(account, UserResponse.class);
+        Data.USER = userResponse;
+        assert userResponse != null;
+        ImClient.getInstance().authenticate(userResponse.getUserAccount(), userResponse.getUserPassword());
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this,
                 R.drawable.bg_list_divider) {
             @Override
-            public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+            public void onDrawOver(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int childCount = parent.getChildCount();
                 int right = parent.getWidth();
                 for (int i = 0; i < childCount; i++) {
@@ -48,11 +59,12 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
             }
         });
         mRecyclerView.setPullRefreshEnabled(false);
-        mRecyclerView.setOnLoadMoreListener(this);
+
         ImClient.getInstance().chatManager().loadConversation(1, 10, conversationList -> {
             mConversationAdapter = new ConversationAdapter(MainActivity.this, conversationList);
             LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(mConversationAdapter);
             mRecyclerView.setAdapter(mLAdapter);
+            mRecyclerView.setLoadMoreEnabled(false);
             mLAdapter.setOnItemClickListener(MainActivity.this);
             mLAdapter.setOnItemLongClickListener(MainActivity.this);
         });
@@ -64,7 +76,25 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
                 mConversationAdapter.update(conversation);
             }
             mConversationAdapter.notifyDataSetChanged();
+            initTitle(mConversationAdapter.getTotalUnRead());
         });
+
+        findViewById(R.id.open_conversation_btn)
+                .setOnClickListener(v -> {
+
+                });
+        findViewById(R.id.logout_btn)
+                .setOnClickListener(v -> {
+                    
+                });
+    }
+
+    private void initTitle(int count) {
+        if (count > 0) {
+            setTitle("幻影(" + count + ")");
+        } else {
+            setTitle("幻影");
+        }
     }
 
     @Override
@@ -74,7 +104,6 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
 
     @Override
     public void onItemClick(View view, int position) {
-        showToast("点击了会话列表");
         Bundle bundle = new Bundle();
         Conversation conversation = mConversationAdapter.getItem(position);
         bundle.putParcelable("conversation", conversation);
@@ -84,10 +113,5 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
     @Override
     public void onItemLongClick(View view, int position) {
         showToast("长按了会话列表");
-    }
-
-    @Override
-    public void onLoadMore() {
-
     }
 }

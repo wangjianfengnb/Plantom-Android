@@ -7,10 +7,14 @@ import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
 import com.phantom.client.model.Constants;
-import com.phantom.client.model.request.FetchMessageRequest;
-import com.phantom.client.model.request.NetworkMessage;
+import com.phantom.client.model.NetworkMessage;
 import com.phantom.client.ssl.SslEngineFactory;
 import com.phantom.client.utils.HttpUtil;
+import com.phantom.common.FetchMessageRequest;
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
@@ -23,10 +27,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.ssl.SslHandler;
-
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 连接管理器
@@ -93,7 +93,7 @@ public class ConnectionManager {
 
     public void initialize(Context context, String serverApi) {
         this.context = context;
-        this.serverApi = serverApi;
+        this.serverApi = serverApi + "/acceptor/ip";
         new ConnectThread().start();
         new SendMessageThread().start();
     }
@@ -164,7 +164,7 @@ public class ConnectionManager {
      */
     public void fetchMessage(String uid, long timestamp) {
         FetchMessageRequest request = FetchMessageRequest.newBuilder()
-                .setPlatform(1)
+                .setPlatform(Constants.PLATFORM_ANDROID)
                 .setSize(10)
                 .setTimestamp(timestamp)
                 .setUid(uid)

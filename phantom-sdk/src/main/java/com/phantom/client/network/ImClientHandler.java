@@ -2,7 +2,7 @@ package com.phantom.client.network;
 
 import android.util.Log;
 
-import com.phantom.client.model.request.NetworkMessage;
+import com.phantom.client.model.NetworkMessage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

@@ -17,4 +17,12 @@ public class RxHelper {
                 .subscribe(aBoolean -> runnable.run());
     }
 
+    public static void runOnBackground(final Runnable runnable) {
+        Observable.just(true)
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .subscribe(a -> runnable.run());
+    }
+
+
 }

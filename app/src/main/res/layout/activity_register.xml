@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/include_custom_toolbar" />
+
+    <EditText
+        android:id="@+id/register_user_name"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y150"
+        android:layout_marginLeft="@dimen/y50"
+        android:layout_marginTop="@dimen/y50"
+        android:layout_marginRight="@dimen/y50"
+        android:background="@drawable/bg_login_edit"
+        android:drawableLeft="@drawable/login_account"
+        android:drawablePadding="@dimen/x20"
+        android:hint="你的名字"
+        android:paddingLeft="@dimen/x50"
+        android:textColor="@color/text"
+        android:textColorHint="@color/hint"
+        android:textSize="@dimen/text_45" />
+
+    <EditText
+        android:id="@+id/register_user_account"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y150"
+        android:layout_marginLeft="@dimen/y50"
+        android:layout_marginTop="@dimen/y50"
+        android:layout_marginRight="@dimen/y50"
+        android:background="@drawable/bg_login_edit"
+        android:drawableLeft="@drawable/login_account"
+        android:drawablePadding="@dimen/x20"
+        android:hint="电话号码"
+        android:paddingLeft="@dimen/x50"
+        android:textColor="@color/text"
+        android:textColorHint="@color/hint"
+        android:textSize="@dimen/text_45" />
+
+    <EditText
+        android:id="@+id/register_user_password"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y150"
+        android:layout_marginLeft="@dimen/y50"
+        android:layout_marginTop="@dimen/y50"
+        android:layout_marginRight="@dimen/y50"
+        android:background="@drawable/bg_login_edit"
+        android:drawableLeft="@drawable/login_password"
+        android:drawablePadding="@dimen/x20"
+        android:hint="密码"
+        android:paddingLeft="@dimen/x50"
+        android:textColor="@color/text"
+        android:textColorHint="@color/hint"
+        android:textSize="@dimen/text_45" />
+
+    <Button
+        android:id="@+id/register_btn"
+        android:layout_height="@dimen/y150"
+        android:layout_marginLeft="@dimen/y50"
+        android:layout_marginTop="@dimen/y80"
+        android:layout_marginRight="@dimen/y50"
+        android:text="注册"
+        android:layout_width="match_parent"
+        android:background="@drawable/bg_login_btn"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_60" />
+
+
+</LinearLayout>

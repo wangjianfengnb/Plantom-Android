@@ -1,6 +1,7 @@
 package com.phantom.client.manager;
 
 import com.phantom.client.model.Conversation;
+import com.phantom.client.model.message.Message;
 
 public interface IChatManager {
 
@@ -35,4 +36,25 @@ public interface IChatManager {
      * @param conversationId 会话ID
      */
     void closeConversation(Long conversationId);
+
+    /**
+     * 发送消息
+     *
+     * @param message 消息
+     */
+    void sendMessage(Message message);
+
+    /**
+     * 添加消息监听器
+     *
+     * @param messageListener 消息监听器
+     */
+    void addOnMessageListener(OnMessageListener messageListener);
+
+    /**
+     * 移除消息监听器
+     *
+     * @param messageListener 消息监听器
+     */
+    void removeOnMessageListener(OnMessageListener messageListener);
 }

@@ -1,7 +1,6 @@
 package com.phantom.sample.adapter;
 
 import android.content.Context;
-import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,20 +36,12 @@ public abstract class BaseAdapter<T, V extends RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(final V holder, int position) {
         if (mOnItemClickListener != null) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mOnItemClickListener.onItemClick(holder, getRealPosition(holder.getAdapterPosition()));
-                }
-            });
+            holder.itemView.setOnClickListener(v -> mOnItemClickListener.onItemClick(holder, getRealPosition(holder.getAdapterPosition())));
         }
         if (mOnItemLongClickListener != null) {
-            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    mOnItemLongClickListener.onItemLongClick(holder, getRealPosition(holder.getAdapterPosition()));
-                    return true;
-                }
+            holder.itemView.setOnLongClickListener(v -> {
+                mOnItemLongClickListener.onItemLongClick(holder, getRealPosition(holder.getAdapterPosition()));
+                return true;
             });
         }
         bind(holder, position);
@@ -111,4 +102,6 @@ public abstract class BaseAdapter<T, V extends RecyclerView.ViewHolder>
     public int getItemCount() {
         return mData == null ? 0 : mData.size();
     }
+
 }
+

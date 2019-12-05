@@ -1,5 +1,7 @@
 package com.phantom.sample.constants;
 
+import com.phantom.sample.api.UserResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,7 +10,7 @@ public class Data {
 
     private static List<String> avatars = new ArrayList<>();
 
-    public static String USER_ID ;
+    public static UserResponse USER;
 
     static {
         avatars.add("http://ww1.sinaimg.cn/large/0065oQSqly1g2pquqlp0nj30n00yiq8u.jpg");

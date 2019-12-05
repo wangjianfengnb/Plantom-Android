@@ -4,9 +4,9 @@ import android.util.Log;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.phantom.client.model.Constants;
-import com.phantom.client.model.request.AuthenticateResponse;
-import com.phantom.client.model.request.NetworkMessage;
+import com.phantom.client.model.NetworkMessage;
 import com.phantom.client.network.ConnectionManager;
+import com.phantom.common.AuthenticateResponse;
 
 public class AuthenticateManager implements MessageHandler {
 

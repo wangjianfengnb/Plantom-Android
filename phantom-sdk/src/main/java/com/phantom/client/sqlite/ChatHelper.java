@@ -33,7 +33,8 @@ public class ChatHelper extends SQLiteOpenHelper {
                 "conversation_type integer," +
                 "unread integer," +
                 "last_update integer," +
-                "last_message varchar(20)" +
+                "last_message varchar(20)," +
+                "conversation_avatar varchar(256)" +
                 ");");
         db.execSQL("CREATE TABLE message(" +
                 "id integer primary key autoincrement," +
@@ -41,7 +42,7 @@ public class ChatHelper extends SQLiteOpenHelper {
                 "message_id integer," +
                 "sender_id varchar(20)," +
                 "receiver_id varchar(20)," +
-                "message_type integer," +
+                "conversation_type integer," +
                 "message_content text," +
                 "message_status integer," +
                 "timestamp integer," +
@@ -75,6 +76,7 @@ public class ChatHelper extends SQLiteOpenHelper {
         contentValues.put("unread", conversation.getUnread());
         contentValues.put("last_update", conversation.getLastUpdate());
         contentValues.put("last_message", conversation.getLastMessage());
+        contentValues.put("conversation_avatar", conversation.getConversationAvatar());
         long id = this.db.insert("conversation", "conversation_id", contentValues);
         conversation.setConversationId(id);
     }
@@ -96,6 +98,7 @@ public class ChatHelper extends SQLiteOpenHelper {
             int unread = cursor.getInt(cursor.getColumnIndex("unread"));
             long lastUpdate = cursor.getLong(cursor.getColumnIndex("last_update"));
             String lastMessage = cursor.getString(cursor.getColumnIndex("last_message"));
+            String conversationAvatar = cursor.getString(cursor.getColumnIndex("conversation_avatar"));
             cursor.close();
             Conversation conversation = new Conversation();
             conversation.setTargetId(targetId);
@@ -106,19 +109,49 @@ public class ChatHelper extends SQLiteOpenHelper {
             conversation.setLastUpdate(lastUpdate);
             conversation.setLastMessage(lastMessage);
             conversation.setUserId(userId);
+            conversation.setConversationAvatar(conversationAvatar);
             return conversation;
         }
         return null;
     }
+
+    public Conversation getConversation(Long conversationId) {
+        Cursor cursor = db.query("conversation", null, "conversation_id = ?",
+                new String[]{String.valueOf(conversationId)}, null, null, null);
+        cursor.moveToFirst();
+        String conversationName = cursor.getString(cursor.getColumnIndex("conversation_name"));
+        int unread = cursor.getInt(cursor.getColumnIndex("unread"));
+        long lastUpdate = cursor.getLong(cursor.getColumnIndex("last_update"));
+        String lastMessage = cursor.getString(cursor.getColumnIndex("last_message"));
+        String targetId = cursor.getString(cursor.getColumnIndex("target_id"));
+        int conversationType = cursor.getInt(cursor.getColumnIndex("conversation_type"));
+        String uid = cursor.getString(cursor.getColumnIndex("user_id"));
+        String conversationAvatar = cursor.getString(cursor.getColumnIndex("conversation_avatar"));
+        cursor.close();
+        Conversation conversation = new Conversation();
+        conversation.setTargetId(targetId);
+        conversation.setConversationName(conversationName);
+        conversation.setConversationId(conversationId);
+        conversation.setConversationType(conversationType);
+        conversation.setUnread(unread);
+        conversation.setLastUpdate(lastUpdate);
+        conversation.setLastMessage(lastMessage);
+        conversation.setUserId(uid);
+        conversation.setConversationAvatar(conversationAvatar);
+        return conversation;
+    }
+
 
     /**
      * 更新会话的未读消息数量
      *
      * @param conversation 会话
      */
-    public void updateConversationUnread(Conversation conversation) {
+    public void updateConversation(Conversation conversation) {
         ContentValues values = new ContentValues();
         values.put("unread", conversation.getUnread());
+        values.put("last_message", conversation.getLastMessage());
+        values.put("last_update", conversation.getLastUpdate());
         db.update("conversation", values, "conversation_id = ?",
                 new String[]{String.valueOf(conversation.getConversationId())});
     }
@@ -134,13 +167,14 @@ public class ChatHelper extends SQLiteOpenHelper {
         contentValues.put("message_id", chatMessage.getMessageId());
         contentValues.put("sender_id", chatMessage.getSenderId());
         contentValues.put("receiver_id", chatMessage.getReceiverId());
-        contentValues.put("message_type", chatMessage.getMessageType());
+        contentValues.put("conversation_type", chatMessage.getConversationType());
         contentValues.put("message_content", chatMessage.getMessageContent());
         contentValues.put("message_status", chatMessage.getMessageStatus());
         contentValues.put("timestamp", chatMessage.getTimestamp());
         contentValues.put("sequence", chatMessage.getSequence());
         contentValues.put("crc", chatMessage.getCrc());
-        this.db.insert("message", "id", contentValues);
+        long id = this.db.insert("message", "id", contentValues);
+        chatMessage.setId(id);
     }
 
     /**
@@ -191,6 +225,7 @@ public class ChatHelper extends SQLiteOpenHelper {
                 String targetId = cursor.getString(cursor.getColumnIndex("target_id"));
                 int conversationType = cursor.getInt(cursor.getColumnIndex("conversation_type"));
                 String lastMessage = cursor.getString(cursor.getColumnIndex("last_message"));
+                String conversationAvatar = cursor.getString(cursor.getColumnIndex("conversation_avatar"));
                 Conversation conversation = new Conversation();
                 conversation.setTargetId(targetId);
                 conversation.setConversationName(conversationName);
@@ -200,6 +235,7 @@ public class ChatHelper extends SQLiteOpenHelper {
                 conversation.setLastUpdate(lastUpdate);
                 conversation.setLastMessage(lastMessage);
                 conversation.setUserId(userId);
+                conversation.setConversationAvatar(conversationAvatar);
                 result.add(conversation);
             } while (cursor.moveToNext());
         }
@@ -217,7 +253,7 @@ public class ChatHelper extends SQLiteOpenHelper {
      */
     public List<ChatMessage> loadC2CMessage(String userId, String targetId, Long maxId) {
         Cursor cursor = db.query("message", null,
-                "user_id = ? AND message_type = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) AND id > ?",
+                "user_id = ? AND conversation_type = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) AND id > ?",
                 new String[]{userId, String.valueOf(Conversation.TYPE_C2C), userId, targetId, targetId, userId, String.valueOf(maxId)},
                 null, null,
                 "id DESC limit 30");
@@ -228,7 +264,7 @@ public class ChatHelper extends SQLiteOpenHelper {
                 long messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
                 String senderId = cursor.getString(cursor.getColumnIndex("sender_id"));
                 String receiverId = cursor.getString(cursor.getColumnIndex("receiver_id"));
-                int messageType = cursor.getInt(cursor.getColumnIndex("message_type"));
+                int conversationType = cursor.getInt(cursor.getColumnIndex("conversation_type"));
                 String messageContent = cursor.getString(cursor.getColumnIndex("message_content"));
                 int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
                 long timestamp = cursor.getLong(cursor.getColumnIndex("timestamp"));
@@ -240,7 +276,7 @@ public class ChatHelper extends SQLiteOpenHelper {
                 message.setMessageId(messageId);
                 message.setSenderId(senderId);
                 message.setReceiverId(receiverId);
-                message.setMessageType(messageType);
+                message.setConversationType(conversationType);
                 message.setMessageContent(messageContent);
                 message.setMessageStatus(messageStatus);
                 message.setTimestamp(timestamp);
@@ -252,5 +288,14 @@ public class ChatHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return result;
+    }
+
+    public void updateMessage(Long id, int status, long messageId, long timestamp) {
+        ContentValues values = new ContentValues();
+        values.put("message_status", status);
+        values.put("message_id", messageId);
+        values.put("timestamp", timestamp);
+        db.update("message", values, "id = ?",
+                new String[]{String.valueOf(id)});
     }
 }

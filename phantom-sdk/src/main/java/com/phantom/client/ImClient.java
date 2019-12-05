@@ -7,11 +7,10 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.phantom.client.manager.IChatManager;
 import com.phantom.client.manager.ManagerFactoryBean;
 import com.phantom.client.manager.MessageHandler;
-import com.phantom.client.model.ChatMessage;
 import com.phantom.client.model.Constants;
-import com.phantom.client.model.request.AuthenticateRequest;
-import com.phantom.client.model.request.NetworkMessage;
+import com.phantom.client.model.NetworkMessage;
 import com.phantom.client.network.ConnectionManager;
+import com.phantom.common.AuthenticateRequest;
 
 /**
  * Im客户端启动类
@@ -42,7 +41,7 @@ public class ImClient {
     public void initialize(Context context, String serverApi) {
         ConnectionManager connectionManager = ConnectionManager.getInstance();
         connectionManager.initialize(context, serverApi);
-        ManagerFactoryBean.init(context);
+        ManagerFactoryBean.init(context,serverApi);
         connectionManager.setMessageListener(message -> {
             try {
                 int requestType = message.getRequestType();
@@ -74,33 +73,4 @@ public class ImClient {
         NetworkMessage networkMessage = NetworkMessage.buildAuthenticateRequest(authenticateRequest);
         connectManager.authenticate(networkMessage);
     }
-
-    /**
-     * 发送一条消息
-     *
-     * @param chatMessage 内容
-     */
-    public void sendMessage(ChatMessage chatMessage) {
-//        ConnectionManager connectManager = ConnectionManager.getInstance();
-//        NetworkMessage message = null;
-//        if (chatMessage.getType() == Conversation.TYPE_C2C) {
-//            C2CMessageRequest request = C2CMessageRequest.newBuilder()
-//                    .setContent(chatMessage.getMessageContent())
-//                    .setSenderId(chatMessage.getSenderId())
-//                    .setReceiverId(chatMessage.getReceiverId())
-//                    .build();
-//            message = NetworkMessage.buildC2CMessageRequest(request);
-//        } else if (chatMessage.getType() == Conversation.TYPE_C2G) {
-//            C2GMessageRequest request = C2GMessageRequest.newBuilder()
-//                    .setContent(chatMessage.getMessageContent())
-//                    .setSenderId(chatMessage.getSenderId())
-//                    .setGroupId(chatMessage.getReceiverId())
-//                    .build();
-//            message = NetworkMessage.buildC2gMessageRequest(request);
-//        }
-//        if (message != null) {
-//            connectManager.sendMessage(message);
-//        }
-    }
-
 }

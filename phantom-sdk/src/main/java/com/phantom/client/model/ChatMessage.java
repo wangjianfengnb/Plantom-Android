@@ -2,14 +2,9 @@ package com.phantom.client.model;
 
 import com.alibaba.fastjson.JSONObject;
 import com.phantom.client.model.message.Message;
-import com.phantom.client.model.request.OfflineMessage;
+import com.phantom.common.OfflineMessage;
 
 public class ChatMessage {
-
-    public static final int STATUS_WAIT_SEND = 1;
-    public static final int STATUS_SENDING = 2;
-    public static final int STATUS_SEND_SUCCESS = 3;
-    public static final int STATUS_SEND_FAILURE = 4;
 
     private Long id;
 
@@ -17,7 +12,7 @@ public class ChatMessage {
 
     private Long messageId;
 
-    private Integer messageType;
+    private Integer conversationType;
 
     private String senderId;
 
@@ -67,12 +62,12 @@ public class ChatMessage {
         this.messageId = messageId;
     }
 
-    public Integer getMessageType() {
-        return messageType;
+    public Integer getConversationType() {
+        return conversationType;
     }
 
-    public void setMessageType(Integer messageType) {
-        this.messageType = messageType;
+    public void setConversationType(Integer conversationType) {
+        this.conversationType = conversationType;
     }
 
     public String getSenderId() {
@@ -136,12 +131,12 @@ public class ChatMessage {
         message.setSenderId(msg.getSenderId());
         message.setReceiverId(msg.getReceiverId());
         message.setMessageId(msg.getMessageId());
-        message.setMessageType(conversation.getConversationType());
-        message.setSequence(message.getSequence());
+        message.setConversationType(conversation.getConversationType());
+        message.setSequence(msg.getSequence());
         message.setMessageContent(msg.getContent());
         message.setTimestamp(msg.getTimestamp());
-        message.setMessageStatus(STATUS_SEND_SUCCESS);
-        message.setCrc("testCrc");
+        message.setMessageStatus(Message.STATUS_SEND_SUCCESS);
+        message.setCrc(msg.getCrc());
         message.setGroupId(msg.getGroupId());
         return message;
     }
@@ -151,6 +146,7 @@ public class ChatMessage {
         Integer type = obj.getInteger("type");
         if (type == Message.TEXT) {
             Message message = new Message();
+            message.setId(id);
             message.setSenderId(senderId);
             message.setReceiverId(receiverId);
             message.setMessageId(messageId);
@@ -159,8 +155,42 @@ public class ChatMessage {
             message.setStatus(messageStatus);
             message.setContent(obj.getString("content"));
             message.setType(type);
+            message.setConversationType(conversationType);
+            message.setGroupId(groupId);
             return message;
         }
         return null;
     }
+
+
+    public static ChatMessage parse(Message msg, String userId) {
+        ChatMessage message = new ChatMessage();
+        message.setUserId(userId);
+        message.setSenderId(msg.getSenderId());
+        message.setReceiverId(msg.getReceiverId());
+        message.setMessageId(msg.getMessageId());
+        message.setConversationType(msg.getConversationType());
+        message.setSequence(message.getSequence());
+        JSONObject obj = new JSONObject();
+        obj.put("type", msg.getType());
+        obj.put("content", msg.getContent());
+        message.setMessageContent(obj.toJSONString());
+        message.setTimestamp(System.currentTimeMillis());
+        message.setMessageStatus(msg.getStatus());
+        message.setCrc(msg.getCrc());
+        message.setGroupId(msg.getGroupId());
+        return message;
+    }
+
+    public static String getMessageDescription(OfflineMessage message) {
+        JSONObject obj = JSONObject.parseObject(message.getContent());
+        Integer type = obj.getInteger("type");
+        if (type == Message.TEXT) {
+            return obj.getString("content");
+        }
+        return "";
+
+    }
+
+
 }

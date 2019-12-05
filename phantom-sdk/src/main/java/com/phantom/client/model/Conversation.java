@@ -3,6 +3,12 @@ package com.phantom.client.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.phantom.client.model.message.Message;
+import com.phantom.client.utils.StringUtils;
+
+import java.util.Locale;
+
+
 public class Conversation implements Parcelable {
 
     public static final int TYPE_C2C = 1;
@@ -27,6 +33,16 @@ public class Conversation implements Parcelable {
     private String lastMessage;
 
     private String userId;
+
+    private String conversationAvatar;
+
+    public String getConversationAvatar() {
+        return conversationAvatar;
+    }
+
+    public void setConversationAvatar(String conversationAvatar) {
+        this.conversationAvatar = conversationAvatar;
+    }
 
     public Conversation() {
     }
@@ -133,5 +149,24 @@ public class Conversation implements Parcelable {
         dest.writeLong(lastUpdate);
         dest.writeString(lastMessage);
         dest.writeString(userId);
+    }
+
+    public Message createTextMessage(String content) {
+        Message message = new Message();
+        message.setSenderId(userId);
+        message.setReceiverId(targetId);
+        message.setContent(content);
+        message.setStatus(Message.STATUS_SENDING);
+        message.setCrc(generateCrc(userId));
+        message.setType(Message.TEXT);
+        message.setConversationId(conversationId);
+        message.setConversationType(conversationType);
+        message.setGroupId(conversationType == Conversation.TYPE_C2G ? targetId : "");
+        return message;
+    }
+
+    private String generateCrc(String uid) {
+        String params = String.format(Locale.getDefault(), "%s%s", uid, StringUtils.getTime());
+        return StringUtils.MD5(params).toUpperCase().substring(8, 24);
     }
 }

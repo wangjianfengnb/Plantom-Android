@@ -57,6 +57,7 @@ public class Constants {
      * 响应状态：正常
      */
     public static final int RESPONSE_STATUS_OK = 1;
+
     /**
      * 响应状态：异常
      */
@@ -68,68 +69,19 @@ public class Constants {
     public static final int HEADER_LENGTH = 20;
 
     /**
-     * session key 前缀
+     * Android 平台
      */
-    public static final String SESSION_PREFIX = "phantom-session-";
+    public static final int PLATFORM_ANDROID = 1;
 
     /**
-     * timeline key 前缀
+     * IOS 平台
      */
-    public static final String TIMELINE_PREFIX = "phantom-timeline-";
+    public static final int PLATFORM_IOS = 2;
 
     /**
-     * 平台同步offset前缀
+     * Web平台
      */
-    public static final String TIMELINE_TIMESTAMP_PREFIX = "phantom-timeline-timestamp-";
-
-    /**
-     * 消息前缀
-     */
-    public static final String MESSAGE_SEQUENCE_PREFIX = "phantom-im-message-sequence-";
-
-    /**
-     * 发送C2C消息topic
-     */
-    public static final String TOPIC_SEND_C2C_MESSAGE = "send_c2c_message";
-
-    /**
-     * 发送C2C消息topic
-     */
-    public static final String TOPIC_SEND_C2C_MESSAGE_RESPONSE = "send_c2c_message_response";
-
-    /**
-     * 推送消息
-     */
-    public static final String TOPIC_PUSH_MESSAGE = "push_message";
-
-    /**
-     * 消息下发结果
-     */
-    public static final String TOPIC_DELIVERY_REPORT = "delivery_report";
-
-    /**
-     * 发送C2G消息topic
-     */
-    public static final String TOPIC_SEND_C2G_MESSAGE = "send_c2g_message";
-    /**
-     * 发送C2G消息Topic
-     */
-    public static final String TOPIC_SEND_C2G_MESSAGE_RESPONSE = "send_c2g_message_response";
-
-    /**
-     * zk用于保存acceptor节点的路径
-     */
-    public static final String ZK_ACCEPTOR_PATH = "/phantom/acceptor";
-
-    /**
-     * zk用于更新acceptor客户端的分布式锁
-     */
-    public static final String ZK_ACCEPTOR_CLIENT_LOCK = "/phantom/lock/client";
-
-    /**
-     * zk用于保存DISPATCHER节点的路径
-     */
-    public static final String ZK_DISPATCH_PATH = "/phantom/dispatcher";
+    public static final int PLATFORM_WEB = 3;
 
 
     public static String requestTypeName(int type) {
