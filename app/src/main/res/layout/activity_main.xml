@@ -19,6 +19,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@color/white"
+        android:padding="@dimen/x20"
         android:orientation="horizontal">
 
         <Button
@@ -30,7 +33,7 @@
             android:background="@drawable/bg_login_btn"
             android:text="开聊"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_60" />
+            android:textSize="@dimen/text_45" />
 
         <Button
             android:id="@+id/logout_btn"
@@ -41,7 +44,7 @@
             android:background="@drawable/bg_login_btn"
             android:text="退出登录"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_60" />
+            android:textSize="@dimen/text_45" />
     </LinearLayout>
 
 

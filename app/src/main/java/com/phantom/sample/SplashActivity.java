@@ -66,9 +66,9 @@ public class SplashActivity extends BaseActivity implements Runnable {
         });
         PropertyValuesHolder holderA = PropertyValuesHolder.ofFloat("alpha", 0, 1);
         PropertyValuesHolder holderYm = PropertyValuesHolder.ofFloat("translationY", 0, 150);
-        ObjectAnimator textAnimator = ObjectAnimator.ofPropertyValuesHolder(mLogoImageView, holderA, holderYm).setDuration(700);
+        ObjectAnimator textAnimator = ObjectAnimator.ofPropertyValuesHolder(mLogoImageView, holderA, holderYm).setDuration(800);
         textAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-        textAnimator.setStartDelay(500);
+        textAnimator.setStartDelay(800);
 
         textAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
