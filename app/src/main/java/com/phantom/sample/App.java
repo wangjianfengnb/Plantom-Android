@@ -3,7 +3,7 @@ package com.phantom.sample;
 import androidx.multidex.MultiDex;
 
 import com.facebook.stetho.Stetho;
-import com.phantom.client.ImClient;
+import com.phantom.client.PhantomClient;
 
 /**
  * 启动Application
@@ -18,7 +18,7 @@ public class App extends android.app.Application {
         MultiDex.install(this);
         mContext = this;
         Stetho.initializeWithDefaults(this);
-        ImClient.getInstance().initialize(this, BuildConfig.SERVER_URL);
+        PhantomClient.getInstance().initialize(this, BuildConfig.SERVER_URL);
     }
 
     public static App getContext() {

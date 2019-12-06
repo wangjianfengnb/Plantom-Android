@@ -13,7 +13,6 @@ import com.phantom.client.utils.HttpUtil;
 import com.phantom.common.FetchMessageRequest;
 
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
@@ -51,12 +50,7 @@ public class ConnectionManager {
     /**
      * 消息发送队列
      */
-    private ArrayBlockingQueue<NetworkMessage> networkMessages = new ArrayBlockingQueue<>(1000);
-
-    /**
-     * 线程池
-     */
-    private ThreadPoolExecutor threadPool = null;
+    private final ArrayBlockingQueue<NetworkMessage> networkMessages = new ArrayBlockingQueue<>(1000);
 
     /**
      * 是否shutdown
@@ -134,15 +128,17 @@ public class ConnectionManager {
         networkMessages.add(networkMessage);
     }
 
+    /**
+     * 退出应用
+     */
     public void shutdown() {
         this.shutdown = true;
-        if (threadPool != null) {
-            this.threadPool.shutdown();
-            this.threadPool = null;
-        }
         if (this.connectThreadGroup != null) {
             this.connectThreadGroup.shutdownGracefully();
             this.connectThreadGroup = null;
+        }
+        synchronized (this) {
+            notifyAll();
         }
     }
 
@@ -184,8 +180,23 @@ public class ConnectionManager {
         }
     }
 
-    public void reauthenticate() {
-        channel.writeAndFlush(authenticateNetworkMessage.getBuffer());
+    public void logout() {
+        if (this.channel != null) {
+            while (!networkMessages.isEmpty()) {
+                synchronized (networkMessages) {
+                    try {
+                        Log.i(TAG,"等待发送消息完成........");
+                        networkMessages.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            Log.i(TAG, "关闭连接........");
+            this.channel.close();
+            this.channel = null;
+        }
+        this.authenticateNetworkMessage = null;
     }
 
     /**
@@ -227,7 +238,7 @@ public class ConnectionManager {
                                     ch.pipeline().addLast(new SslHandler(SslEngineFactory.getEngine(context)));
                                     ch.pipeline().addLast(new DelimiterBasedFrameDecoder(4096,
                                             Unpooled.copiedBuffer(Constants.DELIMITER)));
-                                    ch.pipeline().addLast(new ImClientHandler());
+                                    ch.pipeline().addLast(new PhantomClientHandler());
                                 }
                             });
                     ChannelFuture channelFuture = bootstrap.connect(ip, port).sync();
@@ -258,6 +269,9 @@ public class ConnectionManager {
                 try {
                     NetworkMessage msg = networkMessages.poll(10, TimeUnit.SECONDS);
                     if (msg == null) {
+                        synchronized (networkMessages) {
+                            networkMessages.notifyAll();
+                        }
                         continue;
                     }
                     while (!isAuthenticate) {

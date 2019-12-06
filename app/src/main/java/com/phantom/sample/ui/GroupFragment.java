@@ -15,7 +15,7 @@ import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.github.jdsjlzx.util.RecyclerViewStateUtils;
 import com.github.jdsjlzx.view.LoadingFooter;
-import com.phantom.client.ImClient;
+import com.phantom.client.PhantomClient;
 import com.phantom.client.model.Conversation;
 import com.phantom.sample.R;
 import com.phantom.sample.adapter.GroupAdapter;
@@ -24,7 +24,6 @@ import com.phantom.sample.api.ApiHelper;
 import com.phantom.sample.api.GroupResponse;
 import com.phantom.sample.api.JoinGroupRequest;
 import com.phantom.sample.api.RxSubscriber;
-import com.phantom.sample.api.UserResponse;
 import com.phantom.sample.constants.Data;
 import com.phantom.sample.widget.DividerItemDecoration;
 
@@ -156,7 +155,7 @@ public class GroupFragment extends BaseFragment implements OnItemClickListener, 
     }
 
     private void openChat(Long groupId) {
-        ImClient.getInstance().chatManager()
+        PhantomClient.getInstance().chatManager()
                 .openConversation(Conversation.TYPE_C2G, String.valueOf(groupId), conversation -> {
                     Bundle bundle = new Bundle();
                     bundle.putParcelable("conversation", conversation);

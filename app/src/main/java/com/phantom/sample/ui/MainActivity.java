@@ -14,7 +14,7 @@ import com.github.jdsjlzx.interfaces.OnItemClickListener;
 import com.github.jdsjlzx.interfaces.OnItemLongClickListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
-import com.phantom.client.ImClient;
+import com.phantom.client.PhantomClient;
 import com.phantom.client.manager.OnConversationChangeListener;
 import com.phantom.client.model.Conversation;
 import com.phantom.sample.R;
@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
         assert userResponse != null;
         TextView name = findViewById(R.id.main_name_tv);
         name.setText(String.format("欢迎: %s (%s)", userResponse.getUserName(), userResponse.getUserAccount()));
-        ImClient.getInstance().authenticate(userResponse.getUserAccount(), userResponse.getUserPassword());
+        PhantomClient.getInstance().login(userResponse.getUserAccount(), userResponse.getUserPassword());
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this,
@@ -65,7 +65,7 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
         });
         mRecyclerView.setPullRefreshEnabled(false);
 
-        ImClient.getInstance().chatManager().loadConversation(1, 10, conversationList -> {
+        PhantomClient.getInstance().chatManager().loadConversation(1, 10, conversationList -> {
             mConversationAdapter = new ConversationAdapter(MainActivity.this, conversationList);
             LRecyclerViewAdapter mLAdapter = new LRecyclerViewAdapter(mConversationAdapter);
             mRecyclerView.setAdapter(mLAdapter);
@@ -74,7 +74,7 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
             mLAdapter.setOnItemLongClickListener(MainActivity.this);
         });
 
-        ImClient.getInstance().chatManager().addOnConversationChangeListener(this);
+        PhantomClient.getInstance().chatManager().addOnConversationChangeListener(this);
 
         findViewById(R.id.open_conversation_btn)
                 .setOnClickListener(v -> {
@@ -82,7 +82,8 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
                 });
         findViewById(R.id.logout_btn)
                 .setOnClickListener(v -> {
-
+                    PhantomClient.getInstance().logout();
+                    startActivity(LoginActivity.class);
                 });
     }
 
@@ -110,7 +111,7 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ImClient.getInstance().chatManager().removeOnConversationChangeListener(this);
+        PhantomClient.getInstance().chatManager().removeOnConversationChangeListener(this);
     }
 
     @Override

@@ -11,9 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.jdsjlzx.interfaces.OnRefreshListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
-import com.github.jdsjlzx.util.RecyclerViewStateUtils;
-import com.github.jdsjlzx.view.LoadingFooter;
-import com.phantom.client.ImClient;
+import com.phantom.client.PhantomClient;
 import com.phantom.client.manager.OnMessageListener;
 import com.phantom.client.model.Conversation;
 import com.phantom.client.model.message.Message;
@@ -58,16 +56,15 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
                 mRecyclerView.setOnRefreshListener(this);
                 setTitle(mConversation.getConversationName());
                 loadMessage(page);
-
             }
         }
         mSendBtn.setOnClickListener(v -> processSendMessage());
-        ImClient.getInstance().chatManager().addOnMessageListener(this);
+        PhantomClient.getInstance().chatManager().addOnMessageListener(this);
 
     }
 
     private void loadMessage(int page) {
-        ImClient.getInstance().chatManager().loadMessage(mConversation, page, messages -> {
+        PhantomClient.getInstance().chatManager().loadMessage(mConversation, page, messages -> {
             if (!messages.isEmpty()) {
                 for (Message message : messages) {
                     mChatAdapter.addFirst(message);
@@ -88,9 +85,9 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
         }
         Message message = mConversation.createTextMessage(text);
         message.setOnStatusChangeListener(() -> mChatAdapter.notifyDataSetChanged());
-        mChatAdapter.addData(message);
-        mChatAdapter.notifyDataSetChanged();
-        ImClient.getInstance().chatManager().sendMessage(message);
+        mChatAdapter.addFirst(message);
+        mChatAdapter.notifyItemChanged(0);
+        PhantomClient.getInstance().chatManager().sendMessage(message);
         mTextEt.setText("");
     }
 
@@ -108,8 +105,8 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ImClient.getInstance().chatManager().removeOnMessageListener(this);
-        ImClient.getInstance().chatManager().closeConversation(mConversation.getConversationId());
+        PhantomClient.getInstance().chatManager().removeOnMessageListener(this);
+        PhantomClient.getInstance().chatManager().closeConversation(mConversation.getConversationId());
     }
 
     @Override

@@ -16,7 +16,7 @@ import io.netty.util.ReferenceCountUtil;
  * @author Jianfeng Wang
  * @since 2019/11/1 13:06
  */
-public class ImClientHandler extends ChannelInboundHandlerAdapter {
+public class PhantomClientHandler extends ChannelInboundHandlerAdapter {
 
     public static String TAG = ConnectionManager.class.getSimpleName();
 

@@ -18,16 +18,16 @@ import com.phantom.common.AuthenticateRequest;
  * @author Jianfeng Wang
  * @since 2019/11/1 12:56
  */
-public class ImClient {
+public class PhantomClient {
 
-    private static final String TAG = ImClient.class.getSimpleName();
+    private static final String TAG = PhantomClient.class.getSimpleName();
 
-    private static ImClient client = new ImClient();
+    private static PhantomClient client = new PhantomClient();
 
-    private ImClient() {
+    private PhantomClient() {
     }
 
-    public static ImClient getInstance() {
+    public static PhantomClient getInstance() {
         return client;
     }
 
@@ -41,7 +41,7 @@ public class ImClient {
     public void initialize(Context context, String serverApi) {
         ConnectionManager connectionManager = ConnectionManager.getInstance();
         connectionManager.initialize(context, serverApi);
-        ManagerFactoryBean.init(context,serverApi);
+        ManagerFactoryBean.init(context, serverApi);
         connectionManager.setMessageListener(message -> {
             try {
                 int requestType = message.getRequestType();
@@ -63,7 +63,7 @@ public class ImClient {
      * @param uid   用户ID
      * @param token 用户Token
      */
-    public void authenticate(String uid, String token) {
+    public void login(String uid, String token) {
         ConnectionManager connectManager = ConnectionManager.getInstance();
         AuthenticateRequest authenticateRequest =
                 AuthenticateRequest.newBuilder()
@@ -73,4 +73,10 @@ public class ImClient {
         NetworkMessage networkMessage = NetworkMessage.buildAuthenticateRequest(authenticateRequest);
         connectManager.authenticate(networkMessage);
     }
+
+    public void logout() {
+        ConnectionManager connectManager = ConnectionManager.getInstance();
+        connectManager.logout();
+    }
+
 }

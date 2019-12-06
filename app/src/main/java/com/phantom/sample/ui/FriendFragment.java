@@ -15,8 +15,7 @@ import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.github.jdsjlzx.util.RecyclerViewStateUtils;
 import com.github.jdsjlzx.view.LoadingFooter;
-import com.phantom.client.ImClient;
-import com.phantom.client.manager.OnConversationLoadListener;
+import com.phantom.client.PhantomClient;
 import com.phantom.client.model.Conversation;
 import com.phantom.sample.R;
 import com.phantom.sample.adapter.FriendAdapter;
@@ -126,7 +125,7 @@ public class FriendFragment extends BaseFragment implements OnItemClickListener,
                 .setCancelText("取消")
                 .setConfirmClickListener(sweetAlertDialog -> {
                     UserResponse item = mFriendAdapter.getItem(position);
-                    ImClient.getInstance().chatManager()
+                    PhantomClient.getInstance().chatManager()
                             .openConversation(Conversation.TYPE_C2C, item.getUserAccount(), conversation -> {
                                 Bundle bundle = new Bundle();
                                 bundle.putParcelable("conversation", conversation);
