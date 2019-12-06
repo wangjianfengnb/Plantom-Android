@@ -9,19 +9,19 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.phantom.client.model.ChatMessage;
 import com.phantom.client.model.Constants;
 import com.phantom.client.model.Conversation;
-import com.phantom.client.model.message.Message;
 import com.phantom.client.model.NetworkMessage;
+import com.phantom.client.model.message.Message;
 import com.phantom.client.network.ConnectionManager;
 import com.phantom.client.sqlite.ChatHelper;
 import com.phantom.client.utils.HttpUtil;
 import com.phantom.client.utils.RxHelper;
 import com.phantom.common.C2CMessageRequest;
 import com.phantom.common.C2CMessageResponse;
+import com.phantom.common.C2GMessageRequest;
 import com.phantom.common.C2GMessageResponse;
 import com.phantom.common.FetchMessageResponse;
 import com.phantom.common.InformFetchMessageResponse;
 import com.phantom.common.OfflineMessage;
-
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,9 +52,13 @@ public class ChatManager implements MessageHandler, IChatManager {
 
     private String userId;
 
-    private Map<Long, Long> conversationMaxMessageId = new ConcurrentHashMap<>();
+    private Map<Long, Long> conversationMinMessageId = new ConcurrentHashMap<>();
 
-    private Map<String, Message> inFlightMessages = new HashMap<>();
+    private Map<String, ChatMessage> inFlightMessages = new HashMap<>();
+
+    private Map<Long, Message> sendingMessage = new HashMap<>();
+
+    private volatile boolean inConversation = false;
 
     ChatManager(Context context, String serverApi) {
         chatHelper = new ChatHelper(context);
@@ -78,6 +82,7 @@ public class ChatManager implements MessageHandler, IChatManager {
             notifyAll();
         }
         fetchMessage(this.userId);
+        chatHelper.fireMessageSendingFail(this.userId);
     }
 
     /**
@@ -114,16 +119,6 @@ public class ChatManager implements MessageHandler, IChatManager {
         fetchMessage(informFetchMessageResponse.getUid());
     }
 
-    private void processC2gMessageResponse(NetworkMessage networkMessage) throws InvalidProtocolBufferException {
-        byte[] body = networkMessage.getBody();
-        C2GMessageResponse c2GMessageResponse = C2GMessageResponse.parseFrom(body);
-        if (c2GMessageResponse.getStatus() == Constants.RESPONSE_STATUS_OK) {
-            Log.i(TAG, "发送群聊消息成功...");
-        } else {
-            Log.i(TAG, "发送群聊消息失败，重新发送...");
-        }
-    }
-
     private void processOfflineMessages(NetworkMessage networkMessage) throws InvalidProtocolBufferException {
         FetchMessageResponse response = FetchMessageResponse.parseFrom(networkMessage.getBody());
         Log.i(TAG, "收到抓取离线消息的响应，是否结果为空：" + response.getIsEmpty());
@@ -158,23 +153,64 @@ public class ChatManager implements MessageHandler, IChatManager {
             Log.i(TAG, "发送单聊消息失败...");
         }
         String crc = c2CMessageResponse.getCrc();
-        Message message = inFlightMessages.remove(crc);
+        ChatMessage message = inFlightMessages.remove(crc);
         if (message != null) {
-            message.setStatus(status);
-            long messageId = c2CMessageResponse.getMessageId();
-            long timestamp = c2CMessageResponse.getTimestamp();
-            chatHelper.updateMessage(message.getId(), status, messageId, timestamp);
-            RxHelper.runOnUI(message::invokeListener);
+            message.setMessageId(c2CMessageResponse.getMessageId());
+            message.setTimestamp(c2CMessageResponse.getTimestamp());
+            message.setMessageStatus(status);
+            message.setCrc(crc);
+            updateMessage(message);
+        } else {
+            Log.e(TAG, "收到消息响应，但是找不到发送中的消息：" + c2CMessageResponse);
+        }
+    }
+
+    private void processC2gMessageResponse(NetworkMessage networkMessage) throws InvalidProtocolBufferException {
+        byte[] body = networkMessage.getBody();
+        C2GMessageResponse c2GMessageResponse = C2GMessageResponse.parseFrom(body);
+        int status = Message.STATUS_SENDING;
+        if (c2GMessageResponse.getStatus() == Constants.RESPONSE_STATUS_OK) {
+            Log.i(TAG, "发送群聊消息成功...");
+            status = Message.STATUS_SEND_SUCCESS;
+        } else if (c2GMessageResponse.getStatus() == Constants.RESPONSE_STATUS_ERROR) {
+            Log.i(TAG, "发送群聊消息失败，重新发送...");
+            status = Message.STATUS_SEND_FAILURE;
+        }
+        String crc = c2GMessageResponse.getCrc();
+        ChatMessage message = inFlightMessages.remove(crc);
+        if (message != null) {
+            message.setMessageId(c2GMessageResponse.getMessageId());
+            message.setTimestamp(c2GMessageResponse.getTimestamp());
+            message.setMessageStatus(status);
+            message.setCrc(crc);
+            message.setGroupId(c2GMessageResponse.getGroupId());
+            updateMessage(message);
+        } else {
+            Log.e(TAG, "收到消息响应，但是找不到发送中的消息：" + c2GMessageResponse);
+        }
+    }
+
+    private void updateMessage(ChatMessage message) {
+        chatHelper.updateMessage(message);
+        Message msg = sendingMessage.remove(message.getId());
+        if (msg != null) {
+            RxHelper.runOnUI(msg::invokeListener);
         }
     }
 
     private void handleMessage(OfflineMessage msg) {
-        Conversation conversation = getOrCreateConversation(msg);
+        Log.d(TAG, "收到消息：" + msg);
+        int conversationType = TextUtils.isEmpty(msg.getGroupId()) ? Conversation.TYPE_C2C : Conversation.TYPE_C2G;
+        String targetId = TextUtils.isEmpty(msg.getGroupId()) ? msg.getSenderId() : msg.getGroupId();
+        String lastMessage = ChatMessage.getMessageDescription(msg);
+        long lastUpdate = msg.getTimestamp();
+        int unread = inConversation ? 0 : 1;
+        Conversation conversation = createOrUpdateConversation(conversationType, targetId,
+                lastMessage, lastUpdate, unread);
         ChatMessage chatMessage = ChatMessage.parse(conversation, msg);
         chatMessage.setUserId(userId);
         chatHelper.saveMessage(chatMessage);
         Message message = chatMessage.toMessage(conversation.getConversationId());
-
         for (OnMessageListener listener : onMessageListeners) {
             if (message.getConversationId().equals(listener.conversationId())) {
                 RxHelper.runOnUI(() -> listener.onMessage(message));
@@ -183,26 +219,25 @@ public class ChatManager implements MessageHandler, IChatManager {
 
     }
 
-    private synchronized Conversation getOrCreateConversation(OfflineMessage message) {
-        int conversationType = TextUtils.isEmpty(message.getGroupId()) ? Conversation.TYPE_C2C : Conversation.TYPE_C2G;
-        String targetId = TextUtils.isEmpty(message.getGroupId()) ? message.getSenderId() : message.getGroupId();
+    private synchronized Conversation createOrUpdateConversation(int conversationType, String targetId,
+                                                                 String lastMessage, long lastUpdate,
+                                                                 int unread) {
         Conversation conversation = chatHelper.getConversation(userId, conversationType, targetId);
         if (conversation == null) {
             conversation = new Conversation();
-            conversation.setUnread(inConversation(conversation.getConversationId()) ? 0 : 1);
+            conversation.setUnread(unread);
             conversation.setTargetId(targetId);
             conversation.setUserId(userId);
             conversation.setConversationType(conversationType);
-            conversation.setLastMessage(ChatMessage.getMessageDescription(message));
-            conversation.setLastUpdate(message.getTimestamp());
+            conversation.setLastMessage(lastMessage);
+            conversation.setLastUpdate(lastUpdate);
             appendConversationInfo(conversation);
             chatHelper.saveConversation(conversation);
             informConversationChange(conversation, true);
         } else {
-            conversation.setUnread(conversation.getUnread() +
-                    (inConversation(conversation.getConversationId()) ? 0 : 1));
-            conversation.setLastMessage(ChatMessage.getMessageDescription(message));
-            conversation.setLastUpdate(message.getTimestamp());
+            conversation.setUnread(conversation.getUnread() + unread);
+            conversation.setLastMessage(lastMessage);
+            conversation.setLastUpdate(lastUpdate > 0 ? lastUpdate : conversation.getLastUpdate());
             chatHelper.updateConversation(conversation);
             informConversationChange(conversation, false);
         }
@@ -210,25 +245,27 @@ public class ChatManager implements MessageHandler, IChatManager {
     }
 
     private void appendConversationInfo(Conversation conversation) {
-        if (conversation.getConversationType() == Conversation.TYPE_C2C) {
-            String s = HttpUtil.get(serverApi + "/user/" + conversation.getTargetId(), null);
-            JSONObject obj = JSONObject.parseObject(s);
-            String conversationName = obj.getString("userName");
-            String conversationAvatar = obj.getString("avatar");
-            conversation.setConversationName(conversationName);
-            conversation.setConversationAvatar(conversationAvatar);
-        } else {
-            String s = HttpUtil.get(serverApi + "/group/" + conversation.getTargetId(), null);
-            JSONObject obj = JSONObject.parseObject(s);
-            String conversationName = obj.getString("groupName");
-            String conversationAvatar = obj.getString("groupAvatar");
-            conversation.setConversationName(conversationName);
-            conversation.setConversationAvatar(conversationAvatar);
+        try {
+            if (conversation.getConversationType() == Conversation.TYPE_C2C) {
+                String s = HttpUtil.get(serverApi + "/user/" + conversation.getTargetId(), null);
+                JSONObject obj = JSONObject.parseObject(s);
+                String conversationName = obj.getString("userName");
+                String conversationAvatar = obj.getString("avatar");
+                conversation.setConversationName(conversationName);
+                conversation.setConversationAvatar(conversationAvatar);
+            } else {
+                String s = HttpUtil.get(serverApi + "/group/" + conversation.getTargetId(), null);
+                JSONObject obj = JSONObject.parseObject(s);
+                String conversationName = obj.getString("groupName");
+                String conversationAvatar = obj.getString("groupAvatar");
+                conversation.setConversationName(conversationName);
+                conversation.setConversationAvatar(conversationAvatar);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "获取用户信息失败：", e);
+            conversation.setConversationName("");
+            conversation.setConversationAvatar("");
         }
-    }
-
-    private boolean inConversation(long conversationId) {
-        return conversationMaxMessageId.get(conversationId) != null;
     }
 
     private void informConversationChange(Conversation conversation, boolean isNew) {
@@ -258,46 +295,49 @@ public class ChatManager implements MessageHandler, IChatManager {
     }
 
     @Override
-    public void addOnConversationChangeListener(OnConversationChangeListener onConversationChangeListener) {
-        this.onConversationChangeListeners.add(onConversationChangeListener);
+    public void addOnConversationChangeListener(OnConversationChangeListener listener) {
+        this.onConversationChangeListeners.add(listener);
     }
 
     @Override
-    public void loadMessage(Conversation conversation, OnLoadMessageListener listener) {
-        if (conversation.getConversationType() == Conversation.TYPE_C2C) {
-            Long maxId = conversationMaxMessageId.get(conversation.getConversationId());
-            if (maxId == null) {
-                maxId = 0L;
-                conversationMaxMessageId.put(conversation.getConversationId(), maxId);
-            }
-            List<ChatMessage> chatMessages = chatHelper.loadC2CMessage(userId, conversation.getTargetId(), maxId);
-            if (!chatMessages.isEmpty()) {
-                maxId = chatMessages.get(0).getId();
-                conversationMaxMessageId.put(conversation.getConversationId(), maxId);
-                List<Message> messages = new ArrayList<>();
-                for (ChatMessage msg : chatMessages) {
-                    Message message = msg.toMessage(conversation.getConversationId());
-                    messages.add(message);
-                }
-                if (listener != null) {
-                    listener.onMessage(messages);
-                }
-            }
-        } else if (conversation.getConversationType() == Conversation.TYPE_C2G) {
-            // TODO 群聊
-        }
+    public void removeOnConversationChangeListener(OnConversationChangeListener listener) {
+        this.onConversationChangeListeners.remove(listener);
+    }
 
+    @Override
+    public void loadMessage(Conversation conversation, int page, OnLoadMessageListener listener) {
+        inConversation = true;
+        Long minId = conversationMinMessageId.get(conversation.getConversationId());
+        minId = minId == null ? Long.MAX_VALUE : minId;
+        List<ChatMessage> chatMessages;
+        if (conversation.getConversationType() == Conversation.TYPE_C2C) {
+            chatMessages = chatHelper.loadC2CMessage(userId, conversation.getTargetId(), minId, page);
+        } else {
+            chatMessages = chatHelper.loadC2GMessage(userId, conversation.getTargetId(), minId, page);
+        }
+        if (!chatMessages.isEmpty()) {
+            minId = chatMessages.get(chatMessages.size() - 1).getId();
+            conversationMinMessageId.put(conversation.getConversationId(), minId);
+            List<Message> messages = new ArrayList<>();
+            for (ChatMessage msg : chatMessages) {
+                Message message = msg.toMessage(conversation.getConversationId());
+                messages.add(message);
+            }
+            if (listener != null) {
+                listener.onMessage(messages);
+            }
+        }
         conversation.setLastUpdate(conversation.getLastUpdate());
         conversation.setUnread(0);
         conversation.setLastMessage(conversation.getLastMessage());
         informConversationChange(conversation, false);
         chatHelper.updateConversation(conversation);
-
     }
 
     @Override
     public void closeConversation(Long conversationId) {
-        conversationMaxMessageId.remove(conversationId);
+        conversationMinMessageId.remove(conversationId);
+        inConversation = false;
     }
 
     @Override
@@ -306,21 +346,33 @@ public class ChatManager implements MessageHandler, IChatManager {
             ChatMessage chatMessage = ChatMessage.parse(message, userId);
             chatHelper.saveMessage(chatMessage);
             message.setId(chatMessage.getId());
-            inFlightMessages.put(message.getCrc(), message);
-            C2CMessageRequest request = C2CMessageRequest.newBuilder()
-                    .setContent(chatMessage.getMessageContent())
-                    .setSenderId(chatMessage.getSenderId())
-                    .setReceiverId(chatMessage.getReceiverId())
-                    .setPlatform(Constants.PLATFORM_ANDROID)
-                    .setCrc(message.getCrc())
-                    .build();
+            inFlightMessages.put(message.getCrc(), chatMessage);
+            sendingMessage.put(message.getId(), message);
             Conversation conversation = chatHelper.getConversation(message.getConversationId());
             conversation.setLastUpdate(chatMessage.getTimestamp());
             conversation.setUnread(0);
             conversation.setLastMessage(message.getContent());
             informConversationChange(conversation, false);
             chatHelper.updateConversation(conversation);
-            ConnectionManager.getInstance().sendMessage(NetworkMessage.buildC2CMessageRequest(request));
+            if (message.getConversationType() == Conversation.TYPE_C2C) {
+                C2CMessageRequest request = C2CMessageRequest.newBuilder()
+                        .setContent(chatMessage.getMessageContent())
+                        .setSenderId(chatMessage.getSenderId())
+                        .setReceiverId(chatMessage.getReceiverId())
+                        .setPlatform(Constants.PLATFORM_ANDROID)
+                        .setCrc(message.getCrc())
+                        .build();
+                ConnectionManager.getInstance().sendMessage(NetworkMessage.buildC2CMessageRequest(request));
+            } else if (message.getConversationType() == Conversation.TYPE_C2G) {
+                C2GMessageRequest request = C2GMessageRequest.newBuilder()
+                        .setContent(chatMessage.getMessageContent())
+                        .setSenderId(chatMessage.getSenderId())
+                        .setGroupId(chatMessage.getGroupId())
+                        .setPlatform(Constants.PLATFORM_ANDROID)
+                        .setCrc(message.getCrc())
+                        .build();
+                ConnectionManager.getInstance().sendMessage(NetworkMessage.buildC2gMessageRequest(request));
+            }
         });
     }
 
@@ -332,5 +384,17 @@ public class ChatManager implements MessageHandler, IChatManager {
     @Override
     public void removeOnMessageListener(OnMessageListener messageListener) {
         onMessageListeners.remove(messageListener);
+    }
+
+    @Override
+    public void openConversation(int conversationType, String targetId, OnConversationLoadListener listener) {
+        RxHelper.runOnBackground(() -> {
+            Conversation conversation = createOrUpdateConversation(conversationType, targetId,
+                    "", -1, 0);
+            if (listener != null) {
+                RxHelper.runOnUI(() -> listener.onConversationLoad(conversation));
+            }
+
+        });
     }
 }

@@ -1,4 +1,4 @@
-package com.phantom.sample;
+package com.phantom.sample.ui;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,9 +6,9 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.EditText;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.phantom.client.utils.StringUtils;
+import com.phantom.sample.R;
 import com.phantom.sample.api.ApiFactory;
 import com.phantom.sample.api.ApiHelper;
 import com.phantom.sample.api.RxSubscriber;

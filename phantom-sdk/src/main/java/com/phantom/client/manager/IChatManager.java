@@ -23,12 +23,19 @@ public interface IChatManager {
     void addOnConversationChangeListener(OnConversationChangeListener listener);
 
     /**
+     * 设置会话变更状态监听器
+     *
+     * @param listener 会话状态变更
+     */
+    void removeOnConversationChangeListener(OnConversationChangeListener listener);
+
+    /**
      * 加载消息
      *
      * @param conversation 会话列表
      * @param listener     加载消息回调
      */
-    void loadMessage(Conversation conversation, OnLoadMessageListener listener);
+    void loadMessage(Conversation conversation, int page, OnLoadMessageListener listener);
 
     /**
      * 关闭会话
@@ -57,4 +64,12 @@ public interface IChatManager {
      * @param messageListener 消息监听器
      */
     void removeOnMessageListener(OnMessageListener messageListener);
+
+    /**
+     * 开启会话
+     *
+     * @param conversationType 会话类型
+     * @param targetId         目标ID
+     */
+    void openConversation(int conversationType, String targetId, OnConversationLoadListener listener);
 }

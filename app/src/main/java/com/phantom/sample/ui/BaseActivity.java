@@ -1,4 +1,4 @@
-package com.phantom.sample;
+package com.phantom.sample.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.phantom.sample.R;
 import com.phantom.sample.widget.CustomToolBar;
 
 public abstract class BaseActivity extends AppCompatActivity {

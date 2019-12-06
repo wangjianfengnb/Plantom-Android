@@ -9,6 +9,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.phantom.client.model.Conversation;
 import com.phantom.client.model.message.Message;
 import com.phantom.sample.R;
 
@@ -16,13 +17,16 @@ import java.util.List;
 
 public class ChatAdapter extends BaseAdapter<Message, ChatAdapter.ChatHolder> {
 
-    public ChatAdapter(Context context, List<Message> data) {
+    private final Conversation conversation;
+
+    public ChatAdapter(Context context, List<Message> data, Conversation conversation) {
         super(context, data);
+        this.conversation = conversation;
     }
 
     @Override
     public void bind(ChatHolder chatHolder, int position) {
-        BaseMessage message = MessageFactory.getMessage(mData.get(position));
+        BaseMessage message = MessageFactory.getMessage(mData.get(position), conversation);
         if (message != null) {
             message.bindView(chatHolder.root);
         }

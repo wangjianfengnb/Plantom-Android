@@ -1,4 +1,4 @@
-package com.phantom.sample;
+package com.phantom.sample.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -12,6 +12,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.phantom.sample.R;
 
 public class SplashActivity extends BaseActivity implements Runnable {
 

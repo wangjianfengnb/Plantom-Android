@@ -1,12 +1,14 @@
 package com.phantom.sample.api;
 
+import java.io.Serializable;
+
 /**
  * 用户
  *
  * @author Jianfeng Wang
  * @since 2019/12/5 15:59
  */
-public class UserResponse {
+public class UserResponse implements Serializable {
 
     /**
      * 用户名

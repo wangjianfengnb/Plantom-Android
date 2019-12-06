@@ -4,56 +4,72 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="end"
-    android:orientation="horizontal"
-    android:padding="@dimen/x20">
-
-    <ImageView
-        android:id="@+id/item_chat_send_failure"
-        android:layout_width="@dimen/x50"
-        android:layout_height="@dimen/y50"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/x20"
-        android:layout_marginRight="@dimen/x20"
-        android:contentDescription="@null"
-        android:src="@drawable/ic_msg_send_failed"
-        android:visibility="visible" />
-
-    <ProgressBar
-        android:id="@+id/item_chat_send_progress"
-        style="@style/Widget.AppCompat.ProgressBar"
-        android:layout_width="@dimen/x50"
-        android:layout_height="@dimen/y50"
-        android:layout_gravity="center_vertical"
-        android:layout_marginEnd="@dimen/x20"
-        android:layout_marginRight="@dimen/x20"
-        android:visibility="visible" />
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/item_chat_send_text_message"
+        android:id="@+id/item_chat_send_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/x20"
-        android:layout_marginRight="@dimen/x20"
-        android:background="@drawable/bg_chat_send_text"
-        android:gravity="start|center_vertical"
-        android:maxWidth="@dimen/x700"
-        android:paddingBottom="@dimen/x20"
-        android:paddingEnd="@dimen/x35"
-        android:paddingLeft="@dimen/x20"
-        android:paddingRight="@dimen/x35"
-        android:paddingStart="@dimen/x20"
-        android:paddingTop="@dimen/x20"
+        android:layout_marginRight="@dimen/x40"
         android:textColor="@color/black"
         android:textSize="@dimen/text_45"
-        tools:text="1" />
+        tools:text="张三" />
 
-    <ImageView
-        android:id="@id/item_chat_avatar"
-        android:layout_width="@dimen/x100"
-        android:layout_height="@dimen/x100"
-        android:layout_marginEnd="@dimen/x20"
-        android:layout_marginRight="@dimen/x20"
-        android:contentDescription="@null"
-        android:scaleType="fitCenter"
-        android:src="@drawable/ic_avatar_default" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:padding="@dimen/x20">
+
+        <ImageView
+            android:id="@+id/item_chat_send_failure"
+            android:layout_width="@dimen/x50"
+            android:layout_height="@dimen/y50"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/x20"
+            android:layout_marginRight="@dimen/x20"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_msg_send_failed"
+            android:visibility="visible" />
+
+        <ProgressBar
+            android:id="@+id/item_chat_send_progress"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="@dimen/x50"
+            android:layout_height="@dimen/y50"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/x20"
+            android:layout_marginRight="@dimen/x20"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/item_chat_send_text_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/x20"
+            android:layout_marginRight="@dimen/x20"
+            android:background="@drawable/bg_chat_send_text"
+            android:gravity="start|center_vertical"
+            android:maxWidth="@dimen/x700"
+            android:paddingStart="@dimen/x20"
+            android:paddingLeft="@dimen/x20"
+            android:paddingTop="@dimen/x20"
+            android:paddingEnd="@dimen/x35"
+            android:paddingRight="@dimen/x35"
+            android:paddingBottom="@dimen/x20"
+            android:textColor="@color/black"
+            android:textSize="@dimen/text_45"
+            tools:text="1" />
+
+        <ImageView
+            android:id="@id/item_chat_avatar"
+            android:layout_width="@dimen/x100"
+            android:layout_height="@dimen/x100"
+            android:layout_marginEnd="@dimen/x20"
+            android:layout_marginRight="@dimen/x20"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_avatar_default" />
+    </LinearLayout>
 </LinearLayout>

@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.phantom.client.model.ChatMessage;
 import com.phantom.client.model.Conversation;
+import com.phantom.client.model.message.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -173,6 +174,7 @@ public class ChatHelper extends SQLiteOpenHelper {
         contentValues.put("timestamp", chatMessage.getTimestamp());
         contentValues.put("sequence", chatMessage.getSequence());
         contentValues.put("crc", chatMessage.getCrc());
+        contentValues.put("group_id", chatMessage.getGroupId());
         long id = this.db.insert("message", "id", contentValues);
         chatMessage.setId(id);
     }
@@ -248,15 +250,15 @@ public class ChatHelper extends SQLiteOpenHelper {
      *
      * @param userId   用户ID
      * @param targetId 目标ID
-     * @param maxId    最小消息ID
+     * @param minId    最小消息ID
      * @return 消息列表
      */
-    public List<ChatMessage> loadC2CMessage(String userId, String targetId, Long maxId) {
+    public List<ChatMessage> loadC2CMessage(String userId, String targetId, Long minId, int page) {
         Cursor cursor = db.query("message", null,
-                "user_id = ? AND conversation_type = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) AND id > ?",
-                new String[]{userId, String.valueOf(Conversation.TYPE_C2C), userId, targetId, targetId, userId, String.valueOf(maxId)},
+                "user_id = ? AND conversation_type = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) AND id < ?",
+                new String[]{userId, String.valueOf(Conversation.TYPE_C2C), userId, targetId, targetId, userId, String.valueOf(minId)},
                 null, null,
-                "id DESC limit 30");
+                "id DESC limit " + 30 * page + ", 30");
         List<ChatMessage> result = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
@@ -290,12 +292,73 @@ public class ChatHelper extends SQLiteOpenHelper {
         return result;
     }
 
-    public void updateMessage(Long id, int status, long messageId, long timestamp) {
-        ContentValues values = new ContentValues();
-        values.put("message_status", status);
-        values.put("message_id", messageId);
-        values.put("timestamp", timestamp);
-        db.update("message", values, "id = ?",
-                new String[]{String.valueOf(id)});
+    /**
+     * 加载单聊消息
+     *
+     * @param userId   用户ID
+     * @param targetId 目标ID
+     * @param minId    最小消息ID
+     * @return 消息列表
+     */
+    public List<ChatMessage> loadC2GMessage(String userId, String targetId, Long minId, int page) {
+        Cursor cursor = db.query("message", null,
+                "user_id = ? AND conversation_type = ? AND group_id = ? AND id < ?",
+                new String[]{userId, String.valueOf(Conversation.TYPE_C2G), targetId, String.valueOf(minId)},
+                null, null,
+                "id DESC limit " + 30 * page + ", 30");
+        List<ChatMessage> result = new ArrayList<>();
+        if (cursor.moveToFirst()) {
+            do {
+                long id = cursor.getLong(cursor.getColumnIndex("id"));
+                long messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
+                String senderId = cursor.getString(cursor.getColumnIndex("sender_id"));
+                String receiverId = cursor.getString(cursor.getColumnIndex("receiver_id"));
+                int conversationType = cursor.getInt(cursor.getColumnIndex("conversation_type"));
+                String messageContent = cursor.getString(cursor.getColumnIndex("message_content"));
+                int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
+                long timestamp = cursor.getLong(cursor.getColumnIndex("timestamp"));
+                long sequence = cursor.getLong(cursor.getColumnIndex("sequence"));
+                String crc = cursor.getString(cursor.getColumnIndex("crc"));
+                String groupId = cursor.getString(cursor.getColumnIndex("group_id"));
+                ChatMessage message = new ChatMessage();
+                message.setId(id);
+                message.setMessageId(messageId);
+                message.setSenderId(senderId);
+                message.setReceiverId(receiverId);
+                message.setConversationType(conversationType);
+                message.setMessageContent(messageContent);
+                message.setMessageStatus(messageStatus);
+                message.setTimestamp(timestamp);
+                message.setCrc(crc);
+                message.setGroupId(groupId);
+                message.setSequence(sequence);
+                result.add(message);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return result;
     }
+
+
+    /**
+     * 更新消息
+     *
+     * @param chatMessage 消息
+     */
+    public void updateMessage(ChatMessage chatMessage) {
+        ContentValues values = new ContentValues();
+        values.put("message_status", chatMessage.getMessageStatus());
+        values.put("message_id", chatMessage.getMessageId());
+        values.put("timestamp", chatMessage.getTimestamp());
+        values.put("group_id", chatMessage.getGroupId());
+        db.update("message", values, "id = ?",
+                new String[]{String.valueOf(chatMessage.getId())});
+    }
+
+    public void fireMessageSendingFail(String userId) {
+        ContentValues values = new ContentValues();
+        values.put("message_status", Message.STATUS_SEND_FAILURE);
+        db.update("message", values, "user_id = ? AND message_status = 2", new String[]{String.valueOf(userId)});
+    }
+
 }

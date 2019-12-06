@@ -37,7 +37,7 @@ public class ConversationAdapter extends BaseAdapter<Conversation, ConversationA
     public void bind(ConversationHolder holder, int position) {
         Conversation conversation = mData.get(position);
         Glide.with(App.getContext())
-                .load(Data.getAvatar())
+                .load(conversation.getConversationAvatar())
                 .transform(new GlideRoundTransform(mContext, 4))
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .error(R.drawable.ic_avatar_default)

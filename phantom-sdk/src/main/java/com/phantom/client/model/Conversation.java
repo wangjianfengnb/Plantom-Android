@@ -36,17 +36,6 @@ public class Conversation implements Parcelable {
 
     private String conversationAvatar;
 
-    public String getConversationAvatar() {
-        return conversationAvatar;
-    }
-
-    public void setConversationAvatar(String conversationAvatar) {
-        this.conversationAvatar = conversationAvatar;
-    }
-
-    public Conversation() {
-    }
-
     protected Conversation(Parcel in) {
         conversationId = in.readLong();
         conversationType = in.readInt();
@@ -56,6 +45,7 @@ public class Conversation implements Parcelable {
         lastUpdate = in.readLong();
         lastMessage = in.readString();
         userId = in.readString();
+        conversationAvatar = in.readString();
     }
 
     public static final Creator<Conversation> CREATOR = new Creator<Conversation>() {
@@ -69,6 +59,17 @@ public class Conversation implements Parcelable {
             return new Conversation[size];
         }
     };
+
+    public String getConversationAvatar() {
+        return conversationAvatar;
+    }
+
+    public void setConversationAvatar(String conversationAvatar) {
+        this.conversationAvatar = conversationAvatar;
+    }
+
+    public Conversation() {
+    }
 
     public String getUserId() {
         return userId;
@@ -134,22 +135,6 @@ public class Conversation implements Parcelable {
         this.lastUpdate = lastUpdate;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(conversationId);
-        dest.writeInt(conversationType);
-        dest.writeString(targetId);
-        dest.writeInt(unread);
-        dest.writeString(conversationName);
-        dest.writeLong(lastUpdate);
-        dest.writeString(lastMessage);
-        dest.writeString(userId);
-    }
 
     public Message createTextMessage(String content) {
         Message message = new Message();
@@ -168,5 +153,23 @@ public class Conversation implements Parcelable {
     private String generateCrc(String uid) {
         String params = String.format(Locale.getDefault(), "%s%s", uid, StringUtils.getTime());
         return StringUtils.MD5(params).toUpperCase().substring(8, 24);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(conversationId);
+        dest.writeInt(conversationType);
+        dest.writeString(targetId);
+        dest.writeInt(unread);
+        dest.writeString(conversationName);
+        dest.writeLong(lastUpdate);
+        dest.writeString(lastMessage);
+        dest.writeString(userId);
+        dest.writeString(conversationAvatar);
     }
 }

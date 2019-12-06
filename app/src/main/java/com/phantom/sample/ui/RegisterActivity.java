@@ -1,10 +1,11 @@
-package com.phantom.sample;
+package com.phantom.sample.ui;
 
 import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 
 import com.phantom.client.utils.StringUtils;
+import com.phantom.sample.R;
 import com.phantom.sample.api.ApiFactory;
 import com.phantom.sample.api.ApiHelper;
 import com.phantom.sample.api.CreateUserRequest;

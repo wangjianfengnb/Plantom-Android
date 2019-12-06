@@ -1,8 +1,9 @@
-package com.phantom.sample;
+package com.phantom.sample.ui;
 
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,14 +15,16 @@ import com.github.jdsjlzx.interfaces.OnItemLongClickListener;
 import com.github.jdsjlzx.recyclerview.LRecyclerView;
 import com.github.jdsjlzx.recyclerview.LRecyclerViewAdapter;
 import com.phantom.client.ImClient;
+import com.phantom.client.manager.OnConversationChangeListener;
 import com.phantom.client.model.Conversation;
+import com.phantom.sample.R;
 import com.phantom.sample.adapter.ConversationAdapter;
 import com.phantom.sample.api.UserResponse;
 import com.phantom.sample.constants.Data;
 import com.phantom.sample.widget.DividerItemDecoration;
 
 
-public class MainActivity extends BaseActivity implements OnItemClickListener, OnItemLongClickListener {
+public class MainActivity extends BaseActivity implements OnItemClickListener, OnItemLongClickListener, OnConversationChangeListener {
 
     private LRecyclerView mRecyclerView;
 
@@ -36,6 +39,8 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
         UserResponse userResponse = JSONObject.parseObject(account, UserResponse.class);
         Data.USER = userResponse;
         assert userResponse != null;
+        TextView name = findViewById(R.id.main_name_tv);
+        name.setText(String.format("欢迎: %s (%s)", userResponse.getUserName(), userResponse.getUserAccount()));
         ImClient.getInstance().authenticate(userResponse.getUserAccount(), userResponse.getUserPassword());
         mRecyclerView = findViewById(R.id.recyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -69,23 +74,15 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
             mLAdapter.setOnItemLongClickListener(MainActivity.this);
         });
 
-        ImClient.getInstance().chatManager().addOnConversationChangeListener((conversation, isNew) -> {
-            if (isNew) {
-                mConversationAdapter.addFirst(conversation);
-            } else {
-                mConversationAdapter.update(conversation);
-            }
-            mConversationAdapter.notifyDataSetChanged();
-            initTitle(mConversationAdapter.getTotalUnRead());
-        });
+        ImClient.getInstance().chatManager().addOnConversationChangeListener(this);
 
         findViewById(R.id.open_conversation_btn)
                 .setOnClickListener(v -> {
-
+                    startActivity(CreateChatActivity.class);
                 });
         findViewById(R.id.logout_btn)
                 .setOnClickListener(v -> {
-                    
+
                 });
     }
 
@@ -111,7 +108,25 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ImClient.getInstance().chatManager().removeOnConversationChangeListener(this);
+    }
+
+    @Override
     public void onItemLongClick(View view, int position) {
         showToast("长按了会话列表");
     }
+
+    @Override
+    public void onConversationChange(Conversation conversation, boolean isNew) {
+        if (isNew) {
+            mConversationAdapter.addFirst(conversation);
+        } else {
+            mConversationAdapter.update(conversation);
+        }
+        mConversationAdapter.notifyDataSetChanged();
+        initTitle(mConversationAdapter.getTotalUnRead());
+    }
+
 }

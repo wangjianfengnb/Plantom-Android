@@ -52,6 +52,7 @@ public class Message {
 
     /**
      * 消息类型
+     *
      * @see Message#TEXT
      */
     private Integer type;
@@ -60,6 +61,11 @@ public class Message {
      * 会话类型
      */
     private Integer conversationType;
+
+    /**
+     * 时间戳
+     */
+    private long timestamp;
 
     /**
      * 群组ID
@@ -164,5 +170,13 @@ public class Message {
         if (listener != null) {
             listener.onStatusChange();
         }
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

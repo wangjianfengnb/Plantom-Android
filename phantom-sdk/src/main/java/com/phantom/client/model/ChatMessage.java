@@ -157,6 +157,7 @@ public class ChatMessage {
             message.setType(type);
             message.setConversationType(conversationType);
             message.setGroupId(groupId);
+            message.setTimestamp(timestamp);
             return message;
         }
         return null;
