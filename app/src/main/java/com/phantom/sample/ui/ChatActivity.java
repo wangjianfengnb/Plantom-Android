@@ -17,7 +17,6 @@ import com.phantom.client.PhantomClient;
 import com.phantom.client.manager.OnMessageListener;
 import com.phantom.client.model.Conversation;
 import com.phantom.client.model.message.Message;
-import com.phantom.client.utils.RxHelper;
 import com.phantom.sample.R;
 import com.phantom.sample.adapter.ChatAdapter;
 
