@@ -253,12 +253,12 @@ public class ChatHelper extends SQLiteOpenHelper {
      * @param minId    最小消息ID
      * @return 消息列表
      */
-    public List<ChatMessage> loadC2CMessage(String userId, String targetId, Long minId, int page) {
+    public List<ChatMessage> loadC2CMessage(String userId, String targetId, Long minId) {
         Cursor cursor = db.query("message", null,
                 "user_id = ? AND conversation_type = ? AND ((sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)) AND id < ?",
                 new String[]{userId, String.valueOf(Conversation.TYPE_C2C), userId, targetId, targetId, userId, String.valueOf(minId)},
                 null, null,
-                "id DESC limit " + 30 * page + ", 30");
+                "id DESC limit 30");
         List<ChatMessage> result = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
@@ -300,12 +300,12 @@ public class ChatHelper extends SQLiteOpenHelper {
      * @param minId    最小消息ID
      * @return 消息列表
      */
-    public List<ChatMessage> loadC2GMessage(String userId, String targetId, Long minId, int page) {
+    public List<ChatMessage> loadC2GMessage(String userId, String targetId, Long minId) {
         Cursor cursor = db.query("message", null,
                 "user_id = ? AND conversation_type = ? AND group_id = ? AND id < ?",
                 new String[]{userId, String.valueOf(Conversation.TYPE_C2G), targetId, String.valueOf(minId)},
                 null, null,
-                "id DESC limit " + 30 * page + ", 30");
+                "id DESC limit 30");
         List<ChatMessage> result = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {

@@ -194,6 +194,7 @@ public class ChatManager implements MessageHandler, IChatManager {
         chatHelper.updateMessage(message);
         Message msg = sendingMessage.remove(message.getId());
         if (msg != null) {
+            msg.setStatus(message.getMessageStatus());
             RxHelper.runOnUI(msg::invokeListener);
         }
     }
@@ -277,21 +278,25 @@ public class ChatManager implements MessageHandler, IChatManager {
     }
 
     @Override
-    public void loadConversation(int page, int size, LoadConversationListener listener) {
-        while (userId == null) {
-            synchronized (this) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+    public void loadConversation(final int page, int size, LoadConversationListener listener) {
+        RxHelper.runOnBackground(new Runnable() {
+            @Override
+            public void run() {
+                while (userId == null) {
+                    synchronized (this) {
+                        try {
+                            wait(20);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                List<Conversation> conversations = chatHelper.loadConversation(userId, page - 1, size);
+                if (listener != null) {
+                    RxHelper.runOnUI(() -> listener.onLoadCompleted(conversations));
                 }
             }
-        }
-        page--;
-        List<Conversation> conversations = chatHelper.loadConversation(userId, page, size);
-        if (listener != null) {
-            listener.onLoadCompleted(conversations);
-        }
+        });
     }
 
     @Override
@@ -305,33 +310,37 @@ public class ChatManager implements MessageHandler, IChatManager {
     }
 
     @Override
-    public void loadMessage(Conversation conversation, int page, OnLoadMessageListener listener) {
-        inConversation = true;
-        Long minId = conversationMinMessageId.get(conversation.getConversationId());
-        minId = minId == null ? Long.MAX_VALUE : minId;
-        List<ChatMessage> chatMessages;
-        if (conversation.getConversationType() == Conversation.TYPE_C2C) {
-            chatMessages = chatHelper.loadC2CMessage(userId, conversation.getTargetId(), minId, page);
-        } else {
-            chatMessages = chatHelper.loadC2GMessage(userId, conversation.getTargetId(), minId, page);
-        }
-        if (!chatMessages.isEmpty()) {
-            minId = chatMessages.get(chatMessages.size() - 1).getId();
-            conversationMinMessageId.put(conversation.getConversationId(), minId);
+    public void loadMessage(Conversation conversation, OnLoadMessageListener listener) {
+        RxHelper.runOnBackground(() -> {
+            inConversation = true;
+            Long minId = conversationMinMessageId.get(conversation.getConversationId());
+            minId = minId == null ? Long.MAX_VALUE : minId;
+            List<ChatMessage> chatMessages;
+            if (conversation.getConversationType() == Conversation.TYPE_C2C) {
+                chatMessages = chatHelper.loadC2CMessage(userId, conversation.getTargetId(), minId);
+            } else {
+                chatMessages = chatHelper.loadC2GMessage(userId, conversation.getTargetId(), minId);
+            }
             List<Message> messages = new ArrayList<>();
-            for (ChatMessage msg : chatMessages) {
-                Message message = msg.toMessage(conversation.getConversationId());
-                messages.add(message);
+            if (!chatMessages.isEmpty()) {
+                minId = chatMessages.get(chatMessages.size() - 1).getId();
+                conversationMinMessageId.put(conversation.getConversationId(), minId);
+                for (ChatMessage msg : chatMessages) {
+                    Message message = msg.toMessage(conversation.getConversationId());
+                    messages.add(message);
+                }
             }
             if (listener != null) {
-                listener.onMessage(messages);
+                RxHelper.runOnUI(() -> {
+                    listener.onMessage(messages);
+                });
             }
-        }
-        conversation.setLastUpdate(conversation.getLastUpdate());
-        conversation.setUnread(0);
-        conversation.setLastMessage(conversation.getLastMessage());
-        informConversationChange(conversation, false);
-        chatHelper.updateConversation(conversation);
+            conversation.setLastUpdate(conversation.getLastUpdate());
+            conversation.setUnread(0);
+            conversation.setLastMessage(conversation.getLastMessage());
+            informConversationChange(conversation, false);
+            chatHelper.updateConversation(conversation);
+        });
     }
 
     @Override

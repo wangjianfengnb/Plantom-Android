@@ -40,15 +40,13 @@ public class TextMessage extends BaseMessage {
             ProgressBar sendPb = view.findViewById(R.id.item_chat_send_progress);
             TextView textTv = view.findViewById(R.id.item_chat_send_text_message);
             ImageView avatarTv = view.findViewById(R.id.item_chat_avatar);
-
-
             String content = message.getContent();
             textTv.setText(content);
             failureIv.setVisibility(message.getStatus() == Message.STATUS_SEND_FAILURE ? View.VISIBLE : View.GONE);
             sendPb.setVisibility(message.getStatus() == Message.STATUS_SENDING ? View.VISIBLE : View.GONE);
             TextView nameTv = view.findViewById(R.id.item_chat_send_name);
             if (conversation.getConversationType() == Conversation.TYPE_C2C) {
-                nameTv.setText(conversation.getConversationName());
+                nameTv.setText(Data.USER.getUserName());
                 Glide.with(App.getContext())
                         .load(Data.USER.getAvatar())
                         .transform(new GlideRoundTransform(root.getContext(), 4))

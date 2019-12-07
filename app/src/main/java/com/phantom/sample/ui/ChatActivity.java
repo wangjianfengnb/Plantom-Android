@@ -2,6 +2,8 @@ package com.phantom.sample.ui;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -15,6 +17,7 @@ import com.phantom.client.PhantomClient;
 import com.phantom.client.manager.OnMessageListener;
 import com.phantom.client.model.Conversation;
 import com.phantom.client.model.message.Message;
+import com.phantom.client.utils.RxHelper;
 import com.phantom.sample.R;
 import com.phantom.sample.adapter.ChatAdapter;
 
@@ -55,27 +58,50 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
                 mRecyclerView.setPullRefreshEnabled(true);
                 mRecyclerView.setOnRefreshListener(this);
                 setTitle(mConversation.getConversationName());
-                loadMessage(page);
+                loadMessage();
             }
         }
         mSendBtn.setOnClickListener(v -> processSendMessage());
         PhantomClient.getInstance().chatManager().addOnMessageListener(this);
-
+        listenSoftInputShow();
     }
 
-    private void loadMessage(int page) {
-        PhantomClient.getInstance().chatManager().loadMessage(mConversation, page, messages -> {
+    private void listenSoftInputShow() {
+        final View rootView = findViewById(android.R.id.content);
+        rootView.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > 800)) {
+                scrollToBottom();
+            }
+        });
+    }
+
+
+    private void loadMessage() {
+        Log.d(TAG, "page = " + page);
+        PhantomClient.getInstance().chatManager().loadMessage(mConversation, messages -> {
+            Log.d(TAG, "加载消息：" + messages);
             if (!messages.isEmpty()) {
                 for (Message message : messages) {
                     mChatAdapter.addFirst(message);
                 }
+                mRecyclerView.refreshComplete();
+                mChatAdapter.notifyDataSetChanged();
+                if (page == 0) {
+                    scrollToBottom();
+                }
             } else {
                 mRecyclerView.refreshComplete();
                 showToast("没有更多数据了");
+                mChatAdapter.notifyDataSetChanged();
             }
-            mChatAdapter.notifyDataSetChanged();
-
         });
+    }
+
+    /**
+     * 滚动到底部
+     */
+    public void scrollToBottom() {
+        mRecyclerView.scrollToPosition(mChatAdapter.getItemCount());
     }
 
     private void processSendMessage() {
@@ -85,10 +111,11 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
         }
         Message message = mConversation.createTextMessage(text);
         message.setOnStatusChangeListener(() -> mChatAdapter.notifyDataSetChanged());
-        mChatAdapter.addFirst(message);
+        mChatAdapter.addData(message);
         mChatAdapter.notifyItemChanged(0);
         PhantomClient.getInstance().chatManager().sendMessage(message);
         mTextEt.setText("");
+        scrollToBottom();
     }
 
     @Override
@@ -99,7 +126,7 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
     @Override
     public void onRefresh() {
         showToast("加载更多");
-        loadMessage(page++);
+        loadMessage();
     }
 
     @Override
@@ -113,6 +140,7 @@ public class ChatActivity extends BaseActivity implements OnRefreshListener, OnM
     public void onMessage(Message message) {
         mChatAdapter.addData(message);
         mChatAdapter.notifyDataSetChanged();
+        scrollToBottom();
     }
 
     @Override

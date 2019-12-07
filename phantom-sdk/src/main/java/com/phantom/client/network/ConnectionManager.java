@@ -112,9 +112,13 @@ public class ConnectionManager {
             channel.writeAndFlush(authenticateNetworkMessage.getBuffer());
         } else {
             isAuthenticate = false;
-            Log.i(TAG, "接入系统宕机了，唤醒线程进行连接...");
-            synchronized (this) {
-                notifyAll();
+            if (authenticateNetworkMessage != null) {
+                Log.i(TAG, "接入系统宕机了，唤醒线程进行连接...");
+                synchronized (this) {
+                    notifyAll();
+                }
+            } else {
+                Log.i(TAG, "退出登录，成功。。。。。");
             }
         }
     }
@@ -185,7 +189,7 @@ public class ConnectionManager {
             while (!networkMessages.isEmpty()) {
                 synchronized (networkMessages) {
                     try {
-                        Log.i(TAG,"等待发送消息完成........");
+                        Log.i(TAG, "等待发送消息完成........");
                         networkMessages.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -207,7 +211,6 @@ public class ConnectionManager {
         public void run() {
             while (!shutdown) {
                 try {
-                    Log.i(TAG, "启动连接线程.....");
                     String s = HttpUtil.get(serverApi, null);
                     JSONObject jsonObject = JSONObject.parseObject(s);
                     if (TextUtils.isEmpty(s)) {
@@ -221,6 +224,7 @@ public class ConnectionManager {
                             ConnectionManager.this.wait();
                         }
                     }
+                    Log.d(TAG, "服务器地址：" + s);
                     String ipAndPort = jsonObject.getString("ipAndPort");
                     String ip = ipAndPort.split(":")[0];
                     int port = Integer.valueOf(ipAndPort.split(":")[1]);
@@ -249,7 +253,7 @@ public class ConnectionManager {
                     }
                 } catch (Exception e) {
                     try {
-                        Log.i(TAG, "连接接入系统发生异常，休眠" + 5000 + "ms后开始重新连接");
+                        Log.e(TAG, "连接接入系统发生异常，休眠" + 5000 + "ms后开始重新连接", e);
                         Thread.sleep(5000);
                     } catch (InterruptedException ex) {
                         ex.printStackTrace();

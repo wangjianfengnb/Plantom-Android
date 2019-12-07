@@ -18,7 +18,7 @@ import io.netty.util.ReferenceCountUtil;
  */
 public class PhantomClientHandler extends ChannelInboundHandlerAdapter {
 
-    public static String TAG = ConnectionManager.class.getSimpleName();
+    public static String TAG = PhantomClientHandler.class.getSimpleName();
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -39,7 +39,7 @@ public class PhantomClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        Log.i(TAG, "连接断开：" + ctx);
+        Log.i(TAG, "和接入系统连接断开：" + ctx);
         ConnectionManager.getInstance().setChannel(null);
     }
 

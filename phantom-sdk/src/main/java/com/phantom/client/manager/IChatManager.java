@@ -35,7 +35,7 @@ public interface IChatManager {
      * @param conversation 会话列表
      * @param listener     加载消息回调
      */
-    void loadMessage(Conversation conversation, int page, OnLoadMessageListener listener);
+    void loadMessage(Conversation conversation, OnLoadMessageListener listener);
 
     /**
      * 关闭会话

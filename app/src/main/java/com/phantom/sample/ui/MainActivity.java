@@ -1,5 +1,7 @@
 package com.phantom.sample.ui;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.view.View;
@@ -83,7 +85,10 @@ public class MainActivity extends BaseActivity implements OnItemClickListener, O
         findViewById(R.id.logout_btn)
                 .setOnClickListener(v -> {
                     PhantomClient.getInstance().logout();
+                    SharedPreferences sp = getSharedPreferences("phantom", Context.MODE_PRIVATE);
+                    sp.edit().remove("userInfo").apply();
                     startActivity(LoginActivity.class);
+                    finish();
                 });
     }
 
