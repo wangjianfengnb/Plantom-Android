@@ -14,3 +14,12 @@
 ```　
 >File -> open Keystore File -> 选择证书库文件 -> 输入密码 -> Tools -> change keystore type -> BKS -> save keystore as -> 保存即可
 ```
+
+# 示例效果
+![1](./doc/1.png)
+![2](./doc/1.png)
+![3](./doc/1.png)
+![4](./doc/1.png)
+![5](./doc/1.png)
+![6](./doc/1.png)
+![7](./doc/1.png)
